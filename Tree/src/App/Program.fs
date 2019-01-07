@@ -18,6 +18,5 @@ let rec merge i =
 
 [<EntryPoint>]
 let main argv =
-    Library.Say.hello "hej"
     0 // return an integer exit code
 
