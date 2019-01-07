@@ -1,0 +1,10 @@
+/home/atila29/dev/fsharp/AFPProjects/Tree/src/App/bin/Debug/netcoreapp2.0/App.deps.json
+/home/atila29/dev/fsharp/AFPProjects/Tree/src/App/bin/Debug/netcoreapp2.0/App.runtimeconfig.json
+/home/atila29/dev/fsharp/AFPProjects/Tree/src/App/bin/Debug/netcoreapp2.0/App.runtimeconfig.dev.json
+/home/atila29/dev/fsharp/AFPProjects/Tree/src/App/bin/Debug/netcoreapp2.0/App.dll
+/home/atila29/dev/fsharp/AFPProjects/Tree/src/App/bin/Debug/netcoreapp2.0/App.pdb
+/home/atila29/dev/fsharp/AFPProjects/Tree/src/App/bin/Debug/netcoreapp2.0/Library.dll
+/home/atila29/dev/fsharp/AFPProjects/Tree/src/App/bin/Debug/netcoreapp2.0/Library.pdb
+/home/atila29/dev/fsharp/AFPProjects/Tree/src/App/obj/Debug/netcoreapp2.0/App.fsproj.CoreCompileInputs.cache
+/home/atila29/dev/fsharp/AFPProjects/Tree/src/App/obj/Debug/netcoreapp2.0/App.dll
+/home/atila29/dev/fsharp/AFPProjects/Tree/src/App/obj/Debug/netcoreapp2.0/App.pdb

@@ -1,0 +1,6 @@
+/home/atila29/dev/fsharp/AFPProjects/Tree/src/Library/bin/Debug/netstandard2.0/Library.deps.json
+/home/atila29/dev/fsharp/AFPProjects/Tree/src/Library/bin/Debug/netstandard2.0/Library.dll
+/home/atila29/dev/fsharp/AFPProjects/Tree/src/Library/bin/Debug/netstandard2.0/Library.pdb
+/home/atila29/dev/fsharp/AFPProjects/Tree/src/Library/obj/Debug/netstandard2.0/Library.fsproj.CoreCompileInputs.cache
+/home/atila29/dev/fsharp/AFPProjects/Tree/src/Library/obj/Debug/netstandard2.0/Library.dll
+/home/atila29/dev/fsharp/AFPProjects/Tree/src/Library/obj/Debug/netstandard2.0/Library.pdb
