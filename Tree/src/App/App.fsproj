@@ -6,7 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Program.fs" />
+    <Compile Include="Tree.fsi" />
+    <Compile Include="TreeDrawer.fsi" />
+    <Compile Include="Tree.fsx" />
+    <Compile Include="TreeDrawer.fsx" />
   </ItemGroup>
 
   <ItemGroup>
