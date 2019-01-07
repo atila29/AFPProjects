@@ -4,3 +4,11 @@
 /home/atila29/dev/fsharp/AFPProjects/Tree/src/Library/obj/Debug/netstandard2.0/Library.fsproj.CoreCompileInputs.cache
 /home/atila29/dev/fsharp/AFPProjects/Tree/src/Library/obj/Debug/netstandard2.0/Library.dll
 /home/atila29/dev/fsharp/AFPProjects/Tree/src/Library/obj/Debug/netstandard2.0/Library.pdb
+C:\Users\nick\Documents\GitHub\AFPProjects\Tree\src\Library\bin\Debug\netstandard2.0\Library.deps.json
+C:\Users\nick\Documents\GitHub\AFPProjects\Tree\src\Library\bin\Debug\netstandard2.0\Library.dll
+C:\Users\nick\Documents\GitHub\AFPProjects\Tree\src\Library\bin\Debug\netstandard2.0\Library.pdb
+C:\Users\nick\Documents\GitHub\AFPProjects\Tree\src\Library\obj\Debug\netstandard2.0\Library.fsprojAssemblyReference.cache
+C:\Users\nick\Documents\GitHub\AFPProjects\Tree\src\Library\obj\Debug\netstandard2.0\Library.AssemblyInfoInputs.cache
+C:\Users\nick\Documents\GitHub\AFPProjects\Tree\src\Library\obj\Debug\netstandard2.0\Library.AssemblyInfo.fs
+C:\Users\nick\Documents\GitHub\AFPProjects\Tree\src\Library\obj\Debug\netstandard2.0\Library.dll
+C:\Users\nick\Documents\GitHub\AFPProjects\Tree\src\Library\obj\Debug\netstandard2.0\Library.pdb
