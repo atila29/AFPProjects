@@ -1,6 +1,7 @@
 ﻿module Tree
 
 open System
+open AST
 
 type Tree<'a> = Node of 'a * ('a Tree list)
 
