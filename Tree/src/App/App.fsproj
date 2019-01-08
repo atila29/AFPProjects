@@ -6,14 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Tree.fsi" />
-    <Compile Include="TreeDrawer.fsi" />
-    <Compile Include="Tree.fsx" />
-    <Compile Include="TreeDrawer.fsx" />
+    <ProjectReference Include="..\Library\Library.fsproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Library\Library.fsproj" />
+    <Compile Include="AST.fs"/>
+    <Compile Include="Tree.fs" />
   </ItemGroup>
 
 </Project>
