@@ -18,7 +18,6 @@ let rec merge i =
     | (ps, []) -> ps
     | ((p,_)::ps, (_,q)::qs) -> (p,q)::merge((ps, qs))
 
-
 let mergelist (es: Extent list) = List.foldBack (fun x acc -> merge (x, acc)) es []
 
 let rec fit a b =
@@ -60,17 +59,65 @@ let design tree =
     in fst (design' tree)
 
 let rec transformExp (exp: Exp) =
-    let rec transformAccess (access: Access) =
+    match exp with
+    | N n           -> Node(string n, [])
+    | B b           -> Node(string b, [])
+    | Access a      -> transformAccess a
+    | Addr a        -> Node("reference", [transformAccess a])
+    | Apply (s, es) -> Node("fun", es |> List.map transformExp) // Should we use s?
+and transformAccess (access: Access) =
         match access with
         | AVar x        -> Node("Var", [])
         | AIndex (a, e) -> Node("Index", [transformAccess a])
         | ADeref e      -> Node("Pointer", [transformExp e])
-    match exp with
-    | N n -> Node("Int", [])
-    | B _ -> Node("Bool", [])
-    | Access a -> transformAccess a
-    | Addr a -> Node("reference", [transformAccess a])
-    | Apply (s, es) -> Node("fun", es |> List.map transformExp)
+
+let rec transformStm (stm: Stm) =
+    let transformGc (gc: GuardedCommand) =
+        match gc with GC cmds -> Node ("GCs", cmds |> List.map (fun (e, stms) -> Node("GS", [Node("Condition", [transformExp e]); Node("Statements", stms |> List.map transformStm)])))
+    
+    match stm with
+    | PrintLn e -> Node("PrintLn", [transformExp e])
+    | Ass (a, e) -> Node("Assignment", [transformAccess a ; transformExp e ])
+    | Return e when e.IsSome -> Node("Return", [transformExp e.Value])
+    | Return _ -> Node("Void", [])
+    | Alt gc -> transformGc gc
+    | Do gc -> transformGc gc
+    | Block (ds, ss) -> Node("Block", [
+        Node("Declarations", ds |> List.map transformDec);
+        Node("Statements", ss |> List.map transformStm);
+    ])
+    | Call (s, es)-> Node(s, es |> List.map transformExp)
+and transformDec (dec: Dec) =
+    let rec transformType (typ: Typ) =
+        let rec transformTypeAcc (tl: Typ list) acc =
+            match tl with 
+            | []-> acc
+            | x::xs -> transformTypeAcc xs (Node("Procedure", [transformType x]))
+        match typ with
+        | ITyp -> Node("Int", [])
+        | BTyp -> Node("Bool", [])
+        | ATyp (t, oi) when oi.IsSome -> Node("Array", [transformType t; Node(string oi.Value, [])])
+        | ATyp (t, _) -> Node("Array", [transformType t])
+        | PTyp t -> Node("TypePoint", [transformType t])
+        | FTyp (ts, t) when t.IsSome ->transformTypeAcc ts (Node("FType",  [Node("Option", [transformType t.Value])]))
+        | FTyp (ts, _) -> transformTypeAcc ts (Node("FType", []))
+    match dec with
+    | VarDec (t, s) -> Node("VarDec", [Node(s,[]); transformType t])
+    | FunDec (t, s, ds, stm) when t.IsSome-> Node("FunDec", [
+        transformType t.Value; 
+        Node("Name", [Node(s, [])]); 
+        Node("Declarations", ds |> List.map transformDec);
+        transformStm stm
+        ])
+    | FunDec (_, s, ds, stm) -> Node("FunDec", [
+        Node("Name", [Node(s, [])]); 
+        Node("Declarations", ds |> List.map transformDec);
+        transformStm stm
+        ])
+
+let transformProgram (program: Program) =
+    match program with
+    | P(ds, stmts) -> Node("Program", [Node("Declarations", ds |> List.map transformDec); Node("", stmts |> List.map transformStm)])
 
 [<EntryPoint>]
 let main argv =
