@@ -84,13 +84,17 @@ let drawTreePS (resultTree:Tree<string * float>) =
         | x::xs -> (List.min(offsets), List.max(offsets))
         | _ -> (0.0, 0.0)
 
-    let translateOffsets (offsets:float list, x) = 
-        let low, high = getOffsetRange offsets
-        let diff = abs(high - low)
-        let length = diff * float(horizontalSep * offsets.Length)
-        let tHigh = float(x) + length / abs(high) / diff 
-        let tLow = float(x) - length + tHigh
-        (int(tLow), int(tHigh))
+    let translateOffsets (offsets:float list, x) =
+        match offsets with
+        | [] -> (x, x)
+        | o::[] -> (x, x)
+        | o::os -> 
+            let low, high = getOffsetRange offsets
+            let diff = abs(high - low)
+            let length = diff * float(horizontalSep * offsets.Length)
+            let tHigh = float(x) + length * abs(high) / diff 
+            let tLow = float(x) - length + tHigh
+            (int(tLow), int(tHigh))
     
     let drawLabel (lbl, x, y) =
         fileString <- appendLine fileString (sprintf "%d %d moveto" (int x) (int y))
@@ -121,7 +125,7 @@ let drawTreePS (resultTree:Tree<string * float>) =
             children |> List.map (fun c ->
                 match c with
                 | Node((_, childOffset), _) ->
-                    let childX = int(float(translatedOffsetDiff) * childOffset / offsetDiff)
+                    let childX = if offsetDiff <> 0.0 then int(float(translatedOffsetDiff) * childOffset / offsetDiff) else x
                     drawLines (c, childX, (y - verticalSep))) |> ignore
             fileString
 
@@ -193,14 +197,17 @@ let transformProgram (program: Program) =
 
 [<EntryPoint>]
 let main argv =
+    let node8 = Node("8", [])
+    let node9 = Node("9", [])
+    let node6 = Node("6", [])
+    let node7 = Node("7", [node8;node9])
     let node5 = Node("5", [])
     let node4 = Node("4", [node5])
     let node3 = Node("3", [node4])
     let node2 = Node("2", [])
-    let node1 = Node("1", [])
+    let node1 = Node("1", [node7])
     let root = Node("root", [node1;node2;node3])
       
-    let result = design root
     let result = design root
     let contents = drawTreePS result
     File.WriteAllText("test.ps", contents)
