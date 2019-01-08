@@ -357,3 +357,8 @@ healthchecksdb
 
 # End of https://www.gitignore.io/api/fsharp,visualstudio
 
+*.cache
+*.dtbcache
+Tree/.vs/Tree/v15/.suo
+*.suo
+*.cache
