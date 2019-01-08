@@ -59,6 +59,18 @@ let design tree =
         in (resulttree, resultextent)
     in fst (design' tree)
 
+let rec transformExp (exp: Exp) =
+    let rec transformAccess (access: Access) =
+        match access with
+        | AVar x        -> Node("Var", [])
+        | AIndex (a, e) -> Node("Index", [transformAccess a])
+        | ADeref e      -> Node("Pointer", [transformExp e])
+    match exp with
+    | N n -> Node("Int", [])
+    | B _ -> Node("Bool", [])
+    | Access a -> transformAccess a
+    | Addr a -> Node("reference", [transformAccess a])
+    | Apply (s, es) -> Node("fun", es |> List.map transformExp)
 
 [<EntryPoint>]
 let main argv =
