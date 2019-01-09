@@ -50,16 +50,20 @@ let fitlist es =
     List.zip (fitlistl es) (fitlistr es) 
     |> List.map(fun (x, y) -> (x+y)/2.0)
 
-let design tree =
-    let rec design' (Node(label, subtrees)) =
-        let (trees, extents) = List.unzip (List.map design' subtrees)
-        let positions = fitlist extents
-        let ptrees = List.zip trees positions |> List.map(fun (x, y) -> movetree (x,y))
-        let pextents = List.zip extents positions |> List.map(fun (x, y) -> moveextent (x,y))
-        let resultextent = (0.0, 0.0)::(mergelist pextents)
-        let resulttree = Node((label, 0.0), ptrees)
-        in (resulttree, resultextent)
-    in fst(design' tree)
+let rec design' (Node(label, subtrees)) =
+    let (trees, extents) = List.unzip (List.map design' subtrees)
+    let positions = fitlist extents
+    let ptrees = List.zip trees positions |> List.map(fun (x, y) -> movetree (x,y))
+    let pextents = List.zip extents positions |> List.map(fun (x, y) -> moveextent (x,y))
+    let resultextent = (0.0, 0.0)::(mergelist pextents)
+    let resulttree = Node((label, 0.0), ptrees)
+    in (resulttree, resultextent)
+
+let design tree = fst(design' tree)
+
+
+
+
 
 let appendLine (a:StringBuilder) (b) = a.Append (string b + "\n")
 
@@ -253,6 +257,14 @@ let main argv =
         Ass(AVar("result"), Apply("+", [Access(AVar("a")); Access(AVar("b"))]))
         PrintLn(Access(AVar("result")))
     ])
+
+    let problemRoot = Node("root", [
+            Node("left", [Node("a", []); Node("b", [])]);
+            Node("center", [Node("c", []); Node("d", [])]);
+            Node("right", []);
+    ])
+    let problemTree = design problemRoot
+    File.WriteAllText("problem.ps", drawTreePS problemTree)
 
     let tree =  (design (transformProgram p1))
     let drawing = drawTreePS tree
