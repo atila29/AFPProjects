@@ -222,6 +222,12 @@ let transformProgram (program: Program) =
 //     let root = P 
 
 
+let rec generateAST width depth =
+    match depth with
+    | 0 -> [], []
+    | n  -> [VarDec(ITyp, "n")], List.init (width - 1) (fun index -> Block(generateAST width (depth - 1))) 
+    
+
 
 [<EntryPoint>]
 let main argv =
