@@ -42,7 +42,7 @@ let fitlistr es =
         match i with
         | [] -> []
         | e::es ->
-            let x = - fit acc e 
+            let x = -(fit acc e) 
                 in x::fitlistr' (merge (moveextent (e,x), acc)) es
     in List.rev (fitlistr' [] es)
 
@@ -59,7 +59,7 @@ let design tree =
         let resultextent = (0.0, 0.0)::(mergelist pextents)
         let resulttree = Node((label, 0.0), ptrees)
         in (resulttree, resultextent)
-    in design' tree
+    in fst(design' tree)
 
 
 let appendLine (a:StringBuilder) (b) = a.Append (string b + "\n")
@@ -69,23 +69,13 @@ let rec appendLines (a:StringBuilder) (b) =
     | x::xs -> appendLines (a.Append (x + "\n")) xs
     | _ -> a
 
-let drawTreePS (resultTree:Tree<string * float>, extent:((float*float) list)) = 
+let drawTreePS (resultTree:Tree<string * float>) = 
     let verticalSep = 40
-    let horizontalSep = 20
+    let horizontalSep = 100
     let lblHeight = 18
     let header = ["%!";"1 1 scale";"700 999 translate";"newpath";"/Times-Roman findfont 10 scalefont setfont"]
     let mutable fileString = StringBuilder()
     fileString <- appendLines fileString header
-    
-    let rec treeWidth current level =
-        match resultTree with
-        | Node((_,_), []) -> 1
-        | Node((_,_), children) -> children |> List.map (fun c -> treeWidth (current + 1) level) |> List.sum
-
-    let rec maxTreeWidth tree level =
-        match tree with
-        | Node((_,_), []) -> 1
-        | Node((_,_), children) -> children.Length + (children |> List.map (fun c -> maxTreeWidth c (level + 1)) |> List.sum)
 
     let getOffsets nodes = nodes |> List.map (fun (Node((_, offset), _)) -> offset)
 
@@ -100,10 +90,8 @@ let drawTreePS (resultTree:Tree<string * float>, extent:((float*float) list)) =
         | o::[] -> (x, x)
         | o::os -> 
             let low, high = getOffsetRange offsets
-            let diff = abs(high - low)
-            let length = diff * float(horizontalSep * offsets.Length)
-            let tHigh = float(x) + length * abs(high) / diff 
-            let tLow = float(x) - length + abs(tHigh)
+            let tLow = x + int (low * (float horizontalSep))
+            let tHigh = x + int (high * (float horizontalSep))
             (int(tLow), int(tHigh))
     
     let drawLabel (lbl, x, y) =
@@ -128,21 +116,20 @@ let drawTreePS (resultTree:Tree<string * float>, extent:((float*float) list)) =
             // draw vertical line below label
             fileString <- appendLine fileString (sprintf "%d %d moveto" x (y - verticalSep / 2 - int(float lblHeight * 0.7)))
             fileString <- appendLine fileString (sprintf " %d %d lineto" x (y - verticalSep))
-            // draw horizontal line with parent in center
-            let translatedOffsets = translateOffsets (getOffsets children, x)
+            // calculate translated offsets
+            let low, high = getOffsetRange (getOffsets children)
+            let tLow = x + int (low * (float horizontalSep))
+            let tHigh = x + int (high * (float horizontalSep))
+            // draw horizontal line between children
             if children.Length > 0 then
-                fileString <- appendLine fileString (sprintf "%d %d moveto" (fst translatedOffsets) (y - verticalSep))
-                fileString <- appendLine fileString (sprintf " %d %d lineto" (snd translatedOffsets) (y - verticalSep))
+                fileString <- appendLine fileString (sprintf "%d %d moveto" tLow (y - verticalSep))
+                fileString <- appendLine fileString (sprintf " %d %d lineto" tHigh (y - verticalSep))
             fileString <- appendLine fileString "stroke"
             // draw children
-            let translatedOffsetDiff = snd(translatedOffsets) - fst(translatedOffsets)
-            let offsetLow, offsetHigh = getOffsetRange (getOffsets children)
-            let offsetDiff = offsetHigh - offsetLow
             children |> List.map (fun c ->
                 match c with
                 | Node((_, childOffset), _) ->
                     let childX = x + int (childOffset * (float horizontalSep))
-                    //let childX = if offsetDiff <> 0.0 then int(float(translatedOffsetDiff) * childOffset / offsetDiff) + x else x
                     drawLines (c, childX, (y - verticalSep))) |> ignore
           
 
@@ -223,10 +210,11 @@ let transformProgram (program: Program) =
 
 
 let rec generateAST width depth =
-    match depth with
-    | 0 -> [], []
-    | n  -> [VarDec(ITyp, "n")], List.init (width - 1) (fun index -> Block(generateAST width (depth - 1))) 
-    
+    let rec generateRec w d =
+        match depth with
+        | 0 -> [], []
+        | n  -> [VarDec(ITyp, "n")], List.init (w - 1) (fun index -> Block(generateAST w (d - 1))) 
+    (generateRec width depth)
 
 
 [<EntryPoint>]
@@ -270,14 +258,20 @@ let main argv =
         VarDec(ITyp, "b")
     ], [
         Ass(AVar("a"), N(4));
-        Ass(AVar("b"), N(7));
+        Ass(AVar("b"), Access(AVar("a")));
         PrintLn(Apply("+", [Access(AVar("a")); Access(AVar("b"))]))
     ])
+
+    let tree =  (design (transformProgram p1))
+    let drawing = drawTreePS tree
 
     File.WriteAllText("p0.ps", drawTreePS (design (transformProgram p0)))
     File.WriteAllText("p1.ps", drawTreePS (design (transformProgram p1)))
 
       
+    let p = drawTreePS (design (transformProgram (P(generateAST 3 3))))
+    File.WriteAllText("ast1.ps", p)
+
     // let result = design root
     // let contents = drawTreePS result
     // File.WriteAllText("test.ps", contents)
