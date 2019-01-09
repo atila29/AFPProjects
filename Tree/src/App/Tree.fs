@@ -206,7 +206,7 @@ and transformDec (dec: Dec) =
 
 let transformProgram (program: Program) =
     match program with
-    | P(ds, stmts) -> Node("Program", [Node("Declarations", ds |> List.map transformDec); Node("", stmts |> List.map transformStm)])
+    | P(ds, stmts) -> Node("Program", [Node("Declarations", ds |> List.map transformDec); Node("Statements", stmts |> List.map transformStm)])
 
 // let rand = new System.Random()
 // let generateAST depth width =
@@ -262,10 +262,12 @@ let main argv =
     let p1 = P([
         VarDec(ITyp, "a");
         VarDec(ITyp, "b")
+        VarDec(ITyp, "result")
     ], [
         Ass(AVar("a"), N(4));
         Ass(AVar("b"), N(7));
-        PrintLn(Apply("+", [Access(AVar("a")); Access(AVar("b"))]))
+        Ass(AVar("result"), Apply("+", [Access(AVar("a")); Access(AVar("b"))]))
+        PrintLn(Access(AVar("result")))
     ])
 
     File.WriteAllText("p0.ps", drawTreePS (design (transformProgram p0)))
