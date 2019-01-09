@@ -165,18 +165,14 @@ let rec transformStm (stm: Stm) =
     | Call (s, es)-> Node(s, es |> List.map transformExp)
 and transformDec (dec: Dec) =
     let rec transformType (typ: Typ) =
-        let rec transformTypeAcc (tl: Typ list) acc =
-            match tl with 
-            | []-> acc
-            | x::xs -> transformTypeAcc xs (Node("Procedure", [transformType x]))
         match typ with
         | ITyp -> Node("Int", [])
         | BTyp -> Node("Bool", [])
         | ATyp (t, oi) when oi.IsSome -> Node("Array", [transformType t; Node(string oi.Value, [])])
         | ATyp (t, _) -> Node("Array", [transformType t])
         | PTyp t -> Node("TypePoint", [transformType t])
-        | FTyp (ts, t) when t.IsSome ->transformTypeAcc ts (Node("FType",  [Node("Option", [transformType t.Value])]))
-        | FTyp (ts, _) -> transformTypeAcc ts (Node("FType", []))
+        | FTyp (ts, t) when t.IsSome -> Node("FType",  [Node("Option", [transformType t.Value]); Node("Procedure", ts |> List.map transformType)])
+        | FTyp (ts, _) -> Node("FType",  [Node("Procedure", ts |> List.map transformType)])
     match dec with
     | VarDec (t, s) -> Node("VarDec", [Node(s,[]); transformType t])
     | FunDec (t, s, ds, stm) when t.IsSome-> Node("FunDec", [
@@ -194,6 +190,21 @@ and transformDec (dec: Dec) =
 let transformProgram (program: Program) =
     match program with
     | P(ds, stmts) -> Node("Program", [Node("Declarations", ds |> List.map transformDec); Node("", stmts |> List.map transformStm)])
+
+// let rand = new System.Random()
+// let generateAST depth width =
+//     let generateExp w =
+//         match w with
+//         | 1 -> N(rand.Next())
+//         | n when w -> 
+
+
+//     let generateStmt w = 
+//         match w with
+//         | 1 -> PrintLn
+//     let root = P 
+
+
 
 [<EntryPoint>]
 let main argv =
