@@ -61,7 +61,6 @@ let design tree =
         in (resulttree, resultextent)
     in fst(design' tree)
 
-
 let appendLine (a:StringBuilder) (b) = a.Append (string b + "\n")
 
 let rec appendLines (a:StringBuilder) (b) =
@@ -83,16 +82,6 @@ let drawTreePS (resultTree:Tree<string * float>) =
         match offsets with
         | x::xs -> (List.min(offsets), List.max(offsets))
         | _ -> (0.0, 0.0)
-
-    let translateOffsets (offsets:float list, x) =
-        match offsets with
-        | [] -> (x, x)
-        | o::[] -> (x, x)
-        | o::os -> 
-            let low, high = getOffsetRange offsets
-            let tLow = x + int (low * (float horizontalSep))
-            let tHigh = x + int (high * (float horizontalSep))
-            (int(tLow), int(tHigh))
     
     let drawLabel (lbl, x, y) =
         fileString <- appendLine fileString (sprintf "%d %d moveto" (int x) (int y))
@@ -132,7 +121,6 @@ let drawTreePS (resultTree:Tree<string * float>) =
                     let childX = x + int (childOffset * (float horizontalSep))
                     drawLines (c, childX, (y - verticalSep))) |> ignore
           
-
     drawLines (resultTree, 0, 0)
     fileString <- appendLine fileString "showpage"
     fileString.ToString()
@@ -210,10 +198,12 @@ let transformProgram (program: Program) =
 
 
 let rec generateAST width depth =
-    let rec generateRec w d =
-        match depth with
-        | 0 -> [], []
-        | n  -> [VarDec(ITyp, "n")], List.init (w - 1) (fun index -> Block(generateAST w (d - 1))) 
+    let rec generateRec rW rD =
+        match rD, rW with
+        | 0, w -> [], []
+        | 1, w -> [], List.init w (fun i -> Block([], [])) 
+        | 2, w -> (List.init w (fun i -> VarDec(ITyp, string i)), [])
+        | d, w -> [VarDec(ITyp, "n")], List.init (w - 1) (fun index -> Block(generateAST w (d - 3)))
     (generateRec width depth)
 
 
@@ -271,7 +261,7 @@ let main argv =
     File.WriteAllText("p1.ps", drawTreePS (design (transformProgram p1)))
 
       
-    let p = drawTreePS (design (transformProgram (P(generateAST 3 3))))
+    let p = drawTreePS (design (transformProgram (P(generateAST 5 5))))
     File.WriteAllText("ast1.ps", p)
 
     // let result = design root
