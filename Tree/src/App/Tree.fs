@@ -59,7 +59,7 @@ let design tree =
         let resultextent = (0.0, 0.0)::(mergelist pextents)
         let resulttree = Node((label, 0.0), ptrees)
         in (resulttree, resultextent)
-    in fst (design' tree)
+    in design' tree
 
 
 let appendLine (a:StringBuilder) (b) = a.Append (string b + "\n")
@@ -69,14 +69,24 @@ let rec appendLines (a:StringBuilder) (b) =
     | x::xs -> appendLines (a.Append (x + "\n")) xs
     | _ -> a
 
-let drawTreePS (resultTree:Tree<string * float>) = 
+let drawTreePS (resultTree:Tree<string * float>, extent:((float*float) list)) = 
     let verticalSep = 40
     let horizontalSep = 20
-    let lblHeight = 15
+    let lblHeight = 18
     let header = ["%!";"1 1 scale";"700 999 translate";"newpath";"/Times-Roman findfont 10 scalefont setfont"]
     let mutable fileString = StringBuilder()
     fileString <- appendLines fileString header
     
+    let rec treeWidth current level =
+        match resultTree with
+        | Node((_,_), []) -> 1
+        | Node((_,_), children) -> children |> List.map (fun c -> treeWidth (current + 1) level) |> List.sum
+
+    let rec maxTreeWidth tree level =
+        match tree with
+        | Node((_,_), []) -> 1
+        | Node((_,_), children) -> children.Length + (children |> List.map (fun c -> maxTreeWidth c (level + 1)) |> List.sum)
+
     let getOffsets nodes = nodes |> List.map (fun (Node((_, offset), _)) -> offset)
 
     let getOffsetRange offsets =
@@ -93,7 +103,7 @@ let drawTreePS (resultTree:Tree<string * float>) =
             let diff = abs(high - low)
             let length = diff * float(horizontalSep * offsets.Length)
             let tHigh = float(x) + length * abs(high) / diff 
-            let tLow = float(x) - length + tHigh
+            let tLow = float(x) - length + abs(tHigh)
             (int(tLow), int(tHigh))
     
     let drawLabel (lbl, x, y) =
@@ -102,15 +112,21 @@ let drawTreePS (resultTree:Tree<string * float>) =
    
     let rec drawLines (node:Tree<string * float>, x:int, y:int) = 
         match node with
-        | Node((lbl, _), children) ->
-            let vertSegmentLength = ((verticalSep - lblHeight) / 2)
+        |Node ((lbl, _), []) ->
             // draw vertical line above label
             fileString <- appendLine fileString (sprintf "%d %d moveto" x y)
-            fileString <- appendLine fileString (sprintf " %d %d lineto" x (y - vertSegmentLength))
+            fileString <- appendLine fileString (sprintf " %d %d lineto" x (y - verticalSep / 2))
             // draw label
-            drawLabel (lbl, x, y - vertSegmentLength - lblHeight/2)
+            drawLabel (lbl, x, y - verticalSep / 2 - lblHeight / 2)
+            fileString <- appendLine fileString "stroke"
+        | Node((lbl, _), children) ->
+            // draw vertical line above label
+            fileString <- appendLine fileString (sprintf "%d %d moveto" x y)
+            fileString <- appendLine fileString (sprintf " %d %d lineto" x (y - verticalSep / 2))
+            // draw label
+            drawLabel (lbl, x, y - verticalSep / 2 - lblHeight / 2)
             // draw vertical line below label
-            fileString <- appendLine fileString (sprintf "%d %d moveto" x (y - vertSegmentLength - lblHeight))
+            fileString <- appendLine fileString (sprintf "%d %d moveto" x (y - verticalSep / 2 - int(float lblHeight * 0.7)))
             fileString <- appendLine fileString (sprintf " %d %d lineto" x (y - verticalSep))
             // draw horizontal line with parent in center
             let translatedOffsets = translateOffsets (getOffsets children, x)
@@ -125,11 +141,12 @@ let drawTreePS (resultTree:Tree<string * float>) =
             children |> List.map (fun c ->
                 match c with
                 | Node((_, childOffset), _) ->
-                    let childX = if offsetDiff <> 0.0 then int(float(translatedOffsetDiff) * childOffset / offsetDiff) else x
+                    let childX = x + int (childOffset * (float horizontalSep))
+                    //let childX = if offsetDiff <> 0.0 then int(float(translatedOffsetDiff) * childOffset / offsetDiff) + x else x
                     drawLines (c, childX, (y - verticalSep))) |> ignore
-            fileString
+          
 
-    drawLines (resultTree, 0, 0) |> ignore
+    drawLines (resultTree, 0, 0)
     fileString <- appendLine fileString "showpage"
     fileString.ToString()
 
@@ -215,12 +232,12 @@ let main argv =
     let node5 = Node("5", [])
     let node4 = Node("4", [node5])
     let node3 = Node("3", [node4])
-    let node2 = Node("2", [])
-    let node1 = Node("1", [node7])
+    let node2 = Node("2", [Node("10", []); Node("11", []); Node("12", [])])
+    let node1 = Node("1", [node7;node6])
     let root = Node("root", [node1;node2;node3])
       
-    let result = design root
-    let contents = drawTreePS result
+    let result, extent = design root
+    let contents = drawTreePS(result, extent)
     File.WriteAllText("test.ps", contents)
     0 // return an integer exit code
 
