@@ -259,6 +259,15 @@ let main argv =
         ])
     ])
 
+    let p1 = P([
+        VarDec(ITyp, "a");
+        VarDec(ITyp, "b")
+    ], [
+        Ass(AVar("a"), N(4));
+        Ass(AVar("b"), N(7));
+        PrintLn(Apply("+", [Access(AVar("a")); Access(AVar("b"))]))
+    ])
+
     let result0 = design (transformProgram p0)
     File.WriteAllText("p0.ps", drawTreePS result0)
 
