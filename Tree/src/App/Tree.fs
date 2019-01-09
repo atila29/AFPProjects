@@ -152,8 +152,8 @@ let rec transformStm (stm: Stm) =
     | Ass (a, e) -> Node("Assignment", [transformAccess a ; transformExp e ])
     | Return e when e.IsSome -> Node("Return", [transformExp e.Value])
     | Return _ -> Node("Void", [])
-    | Alt gc -> transformGc gc // vis
-    | Do gc -> transformGc gc
+    | Alt gc -> Node("Alt", [transformGc gc]) // vis
+    | Do gc -> Node("Do", [transformGc gc])
     | Block (ds, ss) -> Node("Block", [
         Node("Declarations", ds |> List.map transformDec);
         Node("Statements", ss |> List.map transformStm);
