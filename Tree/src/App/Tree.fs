@@ -208,19 +208,46 @@ let transformProgram (program: Program) =
 
 [<EntryPoint>]
 let main argv =
-    let node8 = Node("8", [])
-    let node9 = Node("9", [])
-    let node6 = Node("6", [])
-    let node7 = Node("7", [node8;node9])
-    let node5 = Node("5", [])
-    let node4 = Node("4", [node5])
-    let node3 = Node("3", [node4])
-    let node2 = Node("2", [])
-    let node1 = Node("1", [node7])
-    let root = Node("root", [node1;node2;node3])
+    // let node8 = Node("8", [])
+    // let node9 = Node("9", [])
+    // let node6 = Node("6", [])
+    // let node7 = Node("7", [node8;node9])
+    // let node5 = Node("5", [])
+    // let node4 = Node("4", [node5])
+    // let node3 = Node("3", [node4])
+    // let node2 = Node("2", [])
+    // let node1 = Node("1", [node7])
+    // let root = Node("root", [node1;node2;node3])
+
+    let p0 = P([
+        VarDec(ITyp, "i0");
+        FunDec(Some(PTyp(BTyp)), "f0", [], Alt(GC([
+            (
+            Apply("+", [N(2); N(3)]),
+            [
+                Return(None)
+            ]
+            )
+        ])))
+    ], [
+        PrintLn(
+            N(32)
+        );
+        Block([
+            VarDec(BTyp, "b1");
+            VarDec(ATyp(ITyp, Some(32)), "array")
+        ], [
+            Ass(AVar("ads"), N(2));
+            Return(Some(Addr(AVar("t23"))))
+        ])
+    ])
+
+    let result0 = design (transformProgram p0)
+    File.WriteAllText("p0.ps", drawTreePS result0)
+
       
-    let result = design root
-    let contents = drawTreePS result
-    File.WriteAllText("test.ps", contents)
+    // let result = design root
+    // let contents = drawTreePS result
+    // File.WriteAllText("test.ps", contents)
     0 // return an integer exit code
 
