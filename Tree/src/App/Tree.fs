@@ -268,8 +268,8 @@ let main argv =
         PrintLn(Apply("+", [Access(AVar("a")); Access(AVar("b"))]))
     ])
 
-    let result0 = design (transformProgram p0)
-    File.WriteAllText("p0.ps", drawTreePS result0)
+    File.WriteAllText("p0.ps", drawTreePS (design (transformProgram p0)))
+    File.WriteAllText("p1.ps", drawTreePS (design (transformProgram p1)))
 
       
     // let result = design root
