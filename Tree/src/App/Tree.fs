@@ -2,7 +2,6 @@
 
 open System.Text
 open System.IO
-open System
 open AST
 
 
@@ -17,11 +16,11 @@ let moveextent (e:Extent, x) = e |> List.map (fun (p, q) -> (p + x, q + x))
 
 let rec merge i =
     match i with
-    | ([], qs) -> qs
-    | (ps, []) -> ps
-    | ((p,_)::ps, (_,q)::qs) -> (p,q)::merge((ps, qs))
+    | [], qs -> qs
+    | ps, [] -> ps
+    | (p,_)::ps, (_,q)::qs -> (p,q)::(merge(ps, qs))
 
-let mergelist (es: Extent list) = List.foldBack (fun x acc -> merge (x, acc)) es []
+let mergelist (es: Extent list) = List.fold (fun acc x -> merge (acc, x)) [] es
 
 let rec fit a b =
     match (a, b) with
@@ -30,39 +29,35 @@ let rec fit a b =
 
 let fitlistl es =
     let rec fitlistl' acc i =
-        match i with
-        | [] -> []
-        | e::es ->
+        match acc, i with
+        | acc, [] -> []
+        | acc, e::es ->
             let x = fit acc e 
-                in x::fitlistl' (merge (acc, moveextent (e,x))) es
+                in x::(fitlistl' (merge (acc, moveextent (e,x))) es)
     in fitlistl' [] es
 
 let fitlistr es =
     let rec fitlistr' acc i =
-        match i with
-        | [] -> []
-        | e::es ->
-            let x = -(fit acc e) 
-                in x::fitlistr' (merge (moveextent (e,x), acc)) es
-    in List.rev (fitlistr' [] es)
+        match acc, i with
+        | acc, [] -> []
+        | acc, e::es ->
+            let x = -(fit e acc) 
+                in x::(fitlistr' (merge (moveextent (e,x), acc)) es)
+    in List.rev (fitlistr' [] (List.rev es))
 
 let fitlist es = 
-    List.zip (fitlistl es) (fitlistr es) 
-    |> List.map(fun (x, y) -> (x+y)/2.0)
+    List.map (fun (x, y) -> (x+y)/2.0) (List.zip (fitlistl es) (fitlistr es))
 
 let rec design' (Node(label, subtrees)) =
     let (trees, extents) = List.unzip (List.map design' subtrees)
     let positions = fitlist extents
-    let ptrees = List.zip trees positions |> List.map(fun (x, y) -> movetree (x,y))
-    let pextents = List.zip extents positions |> List.map(fun (x, y) -> moveextent (x,y))
+    let ptrees = List.map movetree (List.zip trees positions)
+    let pextents = List.map moveextent (List.zip extents positions)
     let resultextent = (0.0, 0.0)::(mergelist pextents)
     let resulttree = Node((label, 0.0), ptrees)
     in (resulttree, resultextent)
 
 let design tree = fst(design' tree)
-
-
-
 
 
 let appendLine (a:StringBuilder) (b) = a.Append (string b + "\n")
@@ -260,7 +255,7 @@ let main argv =
 
     let problemRoot = Node("root", [
             Node("left", [Node("a", []); Node("b", [])]);
-            Node("center", [Node("c", []); Node("d", [])]);
+            Node("center", [Node("c", []); Node("right", [])]);
             Node("right", []);
     ])
     let problemTree = design problemRoot
