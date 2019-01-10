@@ -3,7 +3,7 @@
 
 // You must revise the following 3 pathes 
 
-#r @"C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\packages\FsLexYacc.Runtime.7.0.6\lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10\FsLexYacc.Runtime.dll";
+#r @"C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\packages\FsLexYacc.Runtime.7.0.6\lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10\FsLexYacc.Runtime.dll";
 #r @"C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\bin\Debug\Machine.dll";
 #r @"C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\bin\Debug\VirtualMachine.dll";
 
