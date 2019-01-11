@@ -47,7 +47,10 @@ let _ = goTrace ex0Tree;;
 
 // Parsing of Ex1.gc
 
-let ex1Tree = parseFromFile "Ex1.gc";; 
+let ex1Tree = parseFromFile "Ex1.gc";;
+
+let ex4Tree = parseFromFile "Ex4.gc"
+let ex4Code = CP ex4Tree
 
 // -- is typechecked as follows:
 
@@ -77,10 +80,10 @@ let pts = List.map parseFromFile ["Ex1.gc"; "Ex2.gc";"Ex3.gc"; "Ex4.gc"; "Ex5.gc
 // The parse tree for Ex3.gc
 List.item 2 pts ;;
 
-(*
+
 // Test of programs covered by the first task (Section 3.7):
 List.iter exec ["Ex1.gc"; "Ex2.gc";"Ex3.gc"; "Ex4.gc"; "Ex5.gc"; "Ex6.gc"; "Skip.gc"];;
-
+(*
 // Test of programs covered by the second task (Section 4.3):
 List.iter exec ["Ex7.gc"; "fact.gc"; "factRec.gc"; "factCBV.gc"];;
 

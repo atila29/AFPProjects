@@ -31,17 +31,31 @@ module CodeGeneration =
        | Access acc   -> CA vEnv fEnv acc @ [LDI] 
 
        | Apply("-", [e]) -> CE vEnv fEnv e @  [CSTI 0; SWAP; SUB]
+         
+       | Apply("!", [b]) -> CE vEnv fEnv b @ [NOT]
 
        | Apply("&&",[b1;b2]) -> let labend   = newLabel()
                                 let labfalse = newLabel()
                                 CE vEnv fEnv b1 @ [IFZERO labfalse] @ CE vEnv fEnv b2
                                 @ [GOTO labend; Label labfalse; CSTI 0; Label labend]
 
-       | Apply(o,[e1;e2]) when List.exists (fun x -> o=x) ["+"; "*"; "="]
+       | Apply("||", [b1;b2]) -> let labend  = newLabel()
+                                 let labtrue = newLabel()
+                                 CE vEnv fEnv b1 @ [IFNZRO labtrue] @ CE vEnv fEnv b2
+                                 @ [GOTO labend; Label labtrue; CSTI 1; Label labend]
+
+
+       | Apply(o,[e1;e2]) when List.exists (fun x -> o=x) ["+"; "*"; "="; "<"]
                              -> let ins = match o with
                                           | "+"  -> [ADD]
                                           | "*"  -> [MUL]
-                                          | "="  -> [EQ] 
+                                          | "/"  -> [DIV]
+                                          | "%"  -> [MOD]
+                                          | "="  -> [EQ]
+                                          | "<>" -> [EQ; NOT]
+                                          | "<"  -> [LT]
+                                          | ">"  -> [SWAP; LT]
+                                          
                                           | _    -> failwith "CE: this case is not possible"
                                 CE vEnv fEnv e1 @ CE vEnv fEnv e2 @ ins 
 
@@ -71,13 +85,27 @@ module CodeGeneration =
                       
 /// CS vEnv fEnv s gives the code for a statement s on the basis of a variable and a function environment                          
    let rec CS vEnv fEnv = function
-       | PrintLn e        -> CE vEnv fEnv e @ [PRINTI; INCSP -1] 
+       | PrintLn e      -> CE vEnv fEnv e @ [PRINTI; INCSP -1] 
 
-       | Ass(acc,e)       -> CA vEnv fEnv acc @ CE vEnv fEnv e @ [STI; INCSP -1]
+       | Ass(acc,e)     -> CA vEnv fEnv acc @ CE vEnv fEnv e @ [STI; INCSP -1]
 
-       | Block([],stms) ->   CSs vEnv fEnv stms
+       | Block([],stms) -> CSs vEnv fEnv stms
 
-       | _                -> failwith "CS: this statement is not supported yet"
+       | Alt(GC([]))    -> [CSTI -1; STOP]
+
+       | Alt(GC(alts))  -> let endLabel = newLabel()
+                           (alts |> List.map (fun (e, s) ->
+                               let stmSkipLabel = newLabel()
+                               CE vEnv fEnv e @ [IFZERO stmSkipLabel] @ CSs vEnv fEnv s @ [GOTO endLabel; Label stmSkipLabel]
+                           ) |> List.collect id) @ [CSTI -1; STOP] @ [Label endLabel]
+                                
+       | Do(GC(alts))   -> let startLabel = newLabel() 
+                           [Label startLabel] @ (alts |> List.map (fun (e, s) ->
+                               let stmSkipLabel = newLabel()
+                               CE vEnv fEnv e @ [IFZERO stmSkipLabel] @ CSs vEnv fEnv s @ [GOTO startLabel; Label stmSkipLabel]
+                           ) |> List.collect id)
+
+       | _              -> failwith "CS: this statement is not supported yet"
 
    and CSs vEnv fEnv stms = List.collect (CS vEnv fEnv) stms 
 
