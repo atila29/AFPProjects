@@ -3,9 +3,9 @@
 
 // You must revise the following 3 pathes 
 
-#r @"C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\packages\FsLexYacc.Runtime.7.0.6\lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10\FsLexYacc.Runtime.dll";
-#r @"C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\bin\Debug\Machine.dll";
-#r @"C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\bin\Debug\VirtualMachine.dll";
+#r @"bin/Debug/FsLexYacc.Runtime.dll";
+#r @"bin/Debug/Machine.dll";
+#r @"bin/Debug/virtualMachine.dll";
 
 #load "AST.fs"
 #load "Parser.fs"
@@ -95,5 +95,6 @@ List.iter exec ["par1.gc"; "factImpPTyp.gc"; "QuickSortV2.gc"; "par2.gc"];;
 
 // Test of programs covered by the fifth task using optimized compilation (Section 8.2):
 List.iter execOpt ["par1.gc"; "factImpPTyp.gc"; "QuickSortV2.gc"; "par2.gc"];;
+
 
 *)
