@@ -14,10 +14,10 @@ module TypeCheck =
          | B _              -> BTyp   
          | Access acc       -> tcA gtenv ltenv acc     
          | Addr acc         -> tcA gtenv ltenv acc 
-         | Apply(f,[e]) when List.exists (fun x ->  x=f) ["-"; "!"]  
+         | Apply(f,[e]) when List.exists (fun x -> x=f) ["-"; "!"]  
                             -> tcMonadic gtenv ltenv f e        
 
-         | Apply(f,[e1;e2]) when List.exists (fun x ->  x=f) ["-";"+";"*"; "/"; "%"; "<"; ">"; "<>"; "="; "&&"; "||";]    
+         | Apply(f,[e1;e2]) when List.exists (fun x -> x=f) ["-";"+";"*"; "/"; "%"; "<"; ">"; "<>"; "="; "&&"; "||";]    
                             -> tcDyadic gtenv ltenv f e1 e2   
 
          | _                -> failwith "tcE: not supported yet"
@@ -64,15 +64,32 @@ module TypeCheck =
                                                             if not (List.forall (fun e -> tcE gtenv ltenv e = BTyp) es)
                                                             then failwith "guard is not a boolean expression"
                                                             stms |> List.iter (fun sl -> List.iter (tcS gtenv ltenv) sl)
+                         | Return None                  -> ()
+                         | Return (Some e)              -> ignore(tcE gtenv ltenv e)
                          | _        -> failwith "tcS: this statement is not supported yet"
 
+
+//// checks well-typeness of global declarations, and returns new global declarations
    and tcGDec gtenv = function  
                       | VarDec(t,s)               -> Map.add s t gtenv
-                      | FunDec(topt,f, decs, stm) -> failwith "type check: function/procedure declarations not yet supported"
+                      | FunDec(None,f,decs,stm) -> failwith "procedures not supported"
+                      // A function is well-typed if:
+                      // - the formal parameters are different
+                      // - every return statement has declared return type
+                      // - statement stm is well-typed
+                      | FunDec(Some(t),f,decs,stm) -> let ltenv = Map.ofList(List.zip lDecName lDecTyp)
+                                                            in let lDecTyp, lDecName = List.unzip(decs)
+                                                      if ltenv.Count <> decs.Length
+                                                      then "identical parameters defined in function " + f
 
+
+                                                           
+//// checks well-typeness of a global declaration list, and returns new global declarations
    and tcGDecs gtenv = function
                        | dec::decs -> tcGDecs (tcGDec gtenv dec) decs
                        | _         -> gtenv
+
+
 
 
 /// tcP prog checks the well-typeness of a program prog
