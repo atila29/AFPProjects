@@ -45,8 +45,9 @@ module CodeGeneration =
                                  @ [GOTO labend; Label labtrue; CSTI 1; Label labend]
 
 
-       | Apply(o,[e1;e2]) when List.exists (fun x -> o=x) ["+"; "*"; "="; "<"]
+       | Apply(o,[e1;e2]) when List.exists (fun x -> o=x) ["-";"+"; "*"; "="; "<"]
                              -> let ins = match o with
+                                          | "-" ->  [SUB]
                                           | "+"  -> [ADD]
                                           | "*"  -> [MUL]
                                           | "/"  -> [DIV]
