@@ -71,17 +71,22 @@ module TypeCheck =
 
 //// checks well-typeness of global declarations, and returns new global declarations
    and tcGDec gtenv = function  
-                      | VarDec(t,s)               -> Map.add s t gtenv
+                      | VarDec(t,s)             -> Map.add s t gtenv
                       | FunDec(None,f,decs,stm) -> failwith "procedures not supported"
                       // A function is well-typed if:
-                      // - the formal parameters are different
+                      // - the formal parameters are different (Done)
                       // - every return statement has declared return type
-                      // - statement stm is well-typed
-                      | FunDec(Some(t),f,decs,stm) -> let ltenv = Map.ofList(List.zip lDecName lDecTyp)
-                                                            in let lDecTyp, lDecName = List.unzip(decs)
+                      // - statement stm is well-typed (Done)
+                      | FunDec(Some(t),f,decs,stm) -> let rec cOnlyVarDec = function 
+                                                        | [] -> []
+                                                        | VarDec(dt, dn)::ds -> (dt, dn)::(cOnlyVarDec ds)
+                                                        | _ -> failwith ("locally defined functions not supported (in function " + f + ")")
+                                                      let lDecTyp, lDecName = List.unzip(cOnlyVarDec decs)
+                                                      let ltenv = Map.ofList(List.zip lDecName lDecTyp)
                                                       if ltenv.Count <> decs.Length
-                                                      then "identical parameters defined in function " + f
-
+                                                      then failwith ("identical parameters defined in function " + f)
+                                                      tcS gtenv ltenv stm
+                                                      gtenv
 
                                                            
 //// checks well-typeness of a global declaration list, and returns new global declarations
