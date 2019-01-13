@@ -7,6 +7,7 @@ open GuardedCommands.Frontend.AST
 %token <string> STRING
 %token <string> NAME
 %token ITYP BTYP
+%token FUNCTION RETURN
 %token LP LCP LSP RP RCP RSP
 %token IF FI DO OD BEGIN END 
 %token COMMA COLON SEMI BAR TO
@@ -49,7 +50,9 @@ Typ:
     BasicTyp                          { $1 }
 
 Dec: 
-    NAME COLON Typ                    { VarDec($3,$1) }
+    NAME COLON Typ										{ VarDec($3,$1) }
+  | FUNCTION NAME LP DecList RP COLON Typ EQ Stm SEMI   { FunDec(Some($7), $2, $4, $9) }
+  
 
 DecL: 
                                       { [] }
@@ -70,6 +73,8 @@ Stm:
   | LCP StmL  RCP                     { Block([], $2) } 
   | IF GuardedCommand FI              { Alt $2 }
   | DO GuardedCommand OD              { Do $2  }
+  | RETURN Exp						  { Return Some($2) }
+  | RETURN							  { Return None }
 
 StmL:
                                       { [] } 

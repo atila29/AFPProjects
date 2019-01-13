@@ -19,6 +19,8 @@ module TypeCheck =
 
          | Apply(f,[e1;e2]) when List.exists (fun x -> x=f) ["-";"+";"*"; "/"; "%"; "<"; ">"; "<>"; "="; "&&"; "||";]    
                             -> tcDyadic gtenv ltenv f e1 e2   
+         
+         | Apply(f, es)  -> tcNaryFunction gtenv ltenv f es
 
          | _                -> failwith "tcE: not supported yet"
 
@@ -33,8 +35,14 @@ module TypeCheck =
                                       | (o, BTyp, BTyp) when List.exists (fun x ->  x=o) ["<>";"&&";"||";"="]  -> BTyp 
                                       | _                      -> failwith("illegal/illtyped dyadic expression: " + f)
 
-   and tcNaryFunction gtenv ltenv f es = failwith "type check: functions not supported yet"
- 
+   and tcNaryFunction gtenv ltenv f es =
+        let (argtypes, rtype) = match Map.tryFind f gtenv with
+                                | Some(FTyp(argtypes, rtype)) when rtype.IsSome -> (argtypes, rtype.Value)
+                                | _ -> failwith ("function " + f + " not defined or is procedure")
+        if not (List.forall2 (fun a e -> a = tcE gtenv ltenv e) argtypes es)
+        then failwith "argument and parameter types does not match"
+        rtype
+
    and tcNaryProcedure gtenv ltenv f es = failwith "type check: procedures not supported yet"
       
 
@@ -85,8 +93,9 @@ module TypeCheck =
                                                       let ltenv = Map.ofList(List.zip lDecName lDecTyp)
                                                       if ltenv.Count <> decs.Length
                                                       then failwith ("identical parameters defined in function " + f)
+                                                      let ftyp = FTyp(lDecTyp, Some(t))
                                                       tcS gtenv ltenv stm
-                                                      gtenv
+                                                      Map.add f ftyp gtenv
 
                                                            
 //// checks well-typeness of a global declaration list, and returns new global declarations

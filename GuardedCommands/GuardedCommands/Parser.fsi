@@ -34,6 +34,8 @@ type token =
   | RP
   | RCP
   | RSP
+  | FUNCTION
+  | RETURN
   | ITYP
   | BTYP
   | NAME of (string)
@@ -74,6 +76,8 @@ type tokenId =
     | TOKEN_RP
     | TOKEN_RCP
     | TOKEN_RSP
+    | TOKEN_FUNCTION
+    | TOKEN_RETURN
     | TOKEN_ITYP
     | TOKEN_BTYP
     | TOKEN_NAME

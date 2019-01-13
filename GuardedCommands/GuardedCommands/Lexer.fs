@@ -1,4 +1,4 @@
-# 1 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 1 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
  
 module Lexer
 open System
@@ -10,6 +10,8 @@ let keyword s =
     match s with
     | "bool"      -> BTYP
     | "int"       -> ITYP
+	| "function"  -> FUNCTION
+	| "return"	  -> RETURN
     | "print"     -> PRINT 
     | "skip"      -> SKIP
     | "abort"     -> ABORT
@@ -23,7 +25,7 @@ let keyword s =
     | "false"     -> BOOL(false)
     | _           -> NAME s  
 
-# 26 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 28 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
 let trans : uint16[] array = 
     [| 
    (* State 0 *)
@@ -100,140 +102,140 @@ and tokenize  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_toke
 and _fslex_tokenize  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 39 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 41 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  tokenize lexbuf 
-# 105 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 107 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 1 -> ( 
-# 40 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 42 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  lexbuf.EndPos <- lexbuf.EndPos.NextLine; tokenize lexbuf 
-# 110 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 112 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 2 -> ( 
-# 41 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 43 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  INT<| Int32.Parse(Encoding.UTF8.GetString(lexbuf.Lexeme)) 
-# 115 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 117 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 3 -> ( 
-# 42 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 44 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  LP  
-# 120 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 122 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 4 -> ( 
-# 43 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 45 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  RP  
-# 125 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 127 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 5 -> ( 
-# 44 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 46 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  LSP 
-# 130 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 132 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 6 -> ( 
-# 45 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 47 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  RSP 
-# 135 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 137 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 7 -> ( 
-# 46 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 48 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  LCP 
-# 140 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 142 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 8 -> ( 
-# 47 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 49 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  RCP 
-# 145 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 147 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 9 -> ( 
-# 48 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 50 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  COMMA 
-# 150 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 152 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 10 -> ( 
-# 49 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 51 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  SEMI  
-# 155 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 157 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 11 -> ( 
-# 50 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 52 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  COLON 
-# 160 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 162 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 12 -> ( 
-# 51 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 53 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  BAR 
-# 165 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 167 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 13 -> ( 
-# 52 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 54 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  TO 
-# 170 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 172 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 14 -> ( 
-# 53 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 55 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  ASG   
-# 175 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 177 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 15 -> ( 
-# 54 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 56 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  NEG 
-# 180 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 182 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 16 -> ( 
-# 55 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 57 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  AND 
-# 185 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 187 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 17 -> ( 
-# 56 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 58 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  NEQ 
-# 190 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 192 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 18 -> ( 
-# 57 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 59 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  LT 
-# 195 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 197 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 19 -> ( 
-# 58 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 60 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  GT 
-# 200 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 202 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 20 -> ( 
-# 59 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 61 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  LE 
-# 205 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 207 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 21 -> ( 
-# 60 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 62 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  TIMES 
-# 210 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 212 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 22 -> ( 
-# 61 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 63 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  MINUS 
-# 215 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 217 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 23 -> ( 
-# 62 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 64 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  EQ 
-# 220 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 222 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 24 -> ( 
-# 63 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 65 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  PLUS 
-# 225 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 227 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 25 -> ( 
-# 64 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 66 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  keyword(Encoding.UTF8.GetString(lexbuf.Lexeme)) 
-# 230 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 232 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 26 -> ( 
-# 65 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fsl"
+# 67 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  EOF 
-# 235 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 237 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | _ -> failwith "tokenize"
 
-# 3000000 "C:\Users\mire\Documents\MRH data\Kurser\02257-18\Project 2\TEST\GuardedCommands\GuardedCommands\Lexer.fs"
+# 3000000 "E:\Nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
