@@ -24,6 +24,7 @@ open GuardedCommands.Frontend.AST
 
 %start Main Prog 
 %type <Exp> Exp
+%type <Exp list> ExpL ExpList
 %type <Access> Access
 %type <(Exp * Stm list) list> GCList
 %type <GuardedCommand> GuardedCommand
@@ -49,9 +50,13 @@ BasicTyp:
 Typ:
     BasicTyp                          { $1 }
 
+TypOpt:
+                                      { None }
+  | COLON Typ                         { Some($2) }
+
 Dec: 
-    NAME COLON Typ										{ VarDec($3,$1) }
-  | FUNCTION NAME LP DecList RP COLON Typ EQ Stm SEMI   { FunDec(Some($7), $2, $4, $9) }
+    NAME COLON type                   { VarDec($3,$1) }
+  | FUNCTION NAME LP DecList RP COLON TypOpt EQ Stm SEMI   { FunDec($7, $2, $4, $9) }
   
 
 DecL: 
@@ -73,8 +78,8 @@ Stm:
   | LCP StmL  RCP                     { Block([], $2) } 
   | IF GuardedCommand FI              { Alt $2 }
   | DO GuardedCommand OD              { Do $2  }
-  | RETURN Exp						  { Return Some($2) }
-  | RETURN							  { Return None }
+  | RETURN Exp                        { Return(Some $2) }
+  | RETURN                            { Return None }
 
 StmL:
                                       { [] } 
@@ -90,7 +95,7 @@ GuardedCommand:
 
 GCList:
     Exp TO StmL                       { [($1,$3)]   }
-  | Exp TO StmL BAR GCList	   		  { ($1,$3)::$5 }
+  | Exp TO StmL BAR GCList            { ($1,$3)::$5 }
 
 Exp:
     Access                            { Access $1 }
@@ -108,4 +113,12 @@ Exp:
   | Exp GT Exp                        { Apply(">", [$1; $3])}
   | Exp LT Exp                        { Apply("<", [$1; $3])}
   | Exp NEQ Exp                       { Apply("<>", [$1; $3])}
+  | NAME LP ExpL RP                   { Apply($1, $3) }
 
+ExpL:
+                                      { [] } 
+  | ExpList                           { $1 }    
+
+ExpList:
+  | Exp                               { [$1] }
+  | Exp COMMA ExpList                 { $1 :: $3 }
