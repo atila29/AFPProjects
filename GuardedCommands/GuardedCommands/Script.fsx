@@ -34,55 +34,61 @@ System.IO.Directory.SetCurrentDirectory __SOURCE_DIRECTORY__;;
 // The Ex0.gc example:
 
 
-let ex0Tree = parseFromFile "Ex0.gc";;
+// let ex0Tree = parseFromFile "Ex0.gc";;
 
-let _ = tcP ex0Tree;;
+// let _ = tcP ex0Tree;;
 
-let ex0Code = CP ex0Tree;; 
+// let ex0Code = CP ex0Tree;; 
 
-let _ = go ex0Tree;;
+// let _ = go ex0Tree;;
 
-let _ = goTrace ex0Tree;;
-
-
-// Parsing of Ex1.gc
-
-let ex1Tree = parseFromFile "Ex1.gc";;
-
-let ex4Tree = parseFromFile "Ex4.gc"
-let ex4Code = CP ex4Tree
-
-// -- is typechecked as follows:
-
-let _ = tcP ex1Tree;;
-
-// obtain symbolic code:
-let ex1Code = CP ex1Tree;; 
-
-// -- is executed with trace as follows:
-let stack = goTrace ex1Tree;;
-
-// -- is executed as follows (no trace):
-let sameStack = go ex1Tree;;
-
-// "All in one" parse from file, type check, compile and run 
-
-let _ = exec "Ex1.gc";;
-
-let _ = exec "Ex2.gc";;
-
-// Test of programs covered by the fifth task using optimized compilation (Section 8.2):
-List.iter execOpt ["Ex1.gc"; "Ex2.gc"];;
-
-// All programs relating to the basic version can be parsed:
-let pts = List.map parseFromFile ["Ex1.gc"; "Ex2.gc";"Ex3.gc"; "Ex4.gc"; "Ex5.gc"; "Ex6.gc"; "Skip.gc"];;
-
-// The parse tree for Ex3.gc
-List.item 2 pts ;;
+// let _ = goTrace ex0Tree;;
 
 
-// Test of programs covered by the first task (Section 3.7):
-List.iter exec ["Ex1.gc"; "Ex2.gc";"Ex3.gc"; "Ex4.gc"; "Ex5.gc"; "Ex6.gc"; "Skip.gc"];;
+// // Parsing of Ex1.gc
+
+// let ex1Tree = parseFromFile "Ex1.gc";;
+
+// let ex4Tree = parseFromFile "Ex4.gc"
+// let ex4Code = CP ex4Tree
+
+// // -- is typechecked as follows:
+
+// let _ = tcP ex1Tree;;
+
+// // obtain symbolic code:
+// let ex1Code = CP ex1Tree;; 
+
+// // -- is executed with trace as follows:
+// let stack = goTrace ex1Tree;;
+
+// // -- is executed as follows (no trace):
+// let sameStack = go ex1Tree;;
+
+// // "All in one" parse from file, type check, compile and run 
+
+// let _ = exec "Ex1.gc";;
+
+// let _ = exec "Ex2.gc";;
+
+// // Test of programs covered by the fifth task using optimized compilation (Section 8.2):
+// List.iter execOpt ["Ex1.gc"; "Ex2.gc"];;
+
+// // All programs relating to the basic version can be parsed:
+// let pts = List.map parseFromFile ["Ex1.gc"; "Ex2.gc";"Ex3.gc"; "Ex4.gc"; "Ex5.gc"; "Ex6.gc"; "Skip.gc"];;
+
+// // The parse tree for Ex3.gc
+// List.item 2 pts ;;
+
+
+// // Test of programs covered by the first task (Section 3.7):
+// List.iter exec ["Ex1.gc"; "Ex2.gc";"Ex3.gc"; "Ex4.gc"; "Ex5.gc"; "Ex6.gc"; "Skip.gc"];;
+
+let ex7Tree = parseFromFile "Ex7.gc"
+//let ex7Code = CP ex7Tree
+
+CP ex7Tree
+
 
 // Test of programs covered by the second task (Section 4.3):
 List.iter exec ["Ex7.gc"; "fact.gc"; "factRec.gc"; "factCBV.gc"];;

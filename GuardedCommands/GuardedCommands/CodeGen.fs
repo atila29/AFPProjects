@@ -60,7 +60,8 @@ module CodeGeneration =
                                           | _    -> failwith "CE: this case is not possible"
                                 CE vEnv fEnv e1 @ CE vEnv fEnv e2 @ ins 
 
-       //| Apply(fname, es)    -> es |> List.rev |> CE vEnv fEnv 
+       | Apply(fname, es)    -> let (_, m) = vEnv
+                                (es |> List.collect (CE vEnv fEnv)) @ [CALL(m, fname)] @ [INCSP -1]
 
        | _            -> failwith "CE: not supported yet"
        
@@ -147,7 +148,7 @@ module CodeGeneration =
                                                                                         match p with
                                                                                         | VarDec(t, n) -> (t, n)
                                                                                         | _ -> failwith "Only variable declarations supported in functions"))
-                                                     addv decr vEnv (Map.add f (newLabel(), tyOpt, vardecs) fEnv)
+                                                     addv decr vEnv (Map.add f (f, tyOpt, vardecs) fEnv)
        addv decs (Map.empty, 0) Map.empty
 
     //let rec make_func_decs gvEnv fEnv decs =
@@ -159,10 +160,20 @@ module CodeGeneration =
 
 /// CP prog gives the code for a program prog
    let CP (P(decs,stms)) = 
-       let _ = resetLabels ()
-       let ((gvM,_) as gvEnv, fEnv, initCode) = makeGlobalEnvs decs
+        let _ = resetLabels ()
+        let ((gvM,_) as gvEnv, fEnv, initCode) = makeGlobalEnvs decs
        //let func_decs = make_func_decs gvEnv fEnv decs
-       initCode @ CSs gvEnv fEnv stms @ [STOP]
+
+        // let compileFunc (_, f, fdecs, stm) = 
+        //     let (label, _, _) = findFunction f fEnv
+        //     let lvEnv = bindParams fdecs (gvM, 0)
+            
+
+        let functions = List.choose (function
+            | FunDec(topt, fname, fdecs, stm) -> Some([Label fname]) // @ function codegen
+            | _ -> None) 
+
+        initCode @ CSs gvEnv fEnv stms @ [STOP] @ List.concat (functions decs)
 
 
 
