@@ -1,4 +1,4 @@
-# 1 "Lexer.fsl"
+# 1 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
  
 module Lexer
 open System
@@ -25,7 +25,7 @@ let keyword s =
     | "false"     -> BOOL(false)
     | _           -> NAME s  
 
-# 28 "Lexer.fs"
+# 28 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
 let trans : uint16[] array = 
     [| 
    (* State 0 *)
@@ -102,140 +102,140 @@ and tokenize  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_toke
 and _fslex_tokenize  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 41 "Lexer.fsl"
+# 41 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  tokenize lexbuf 
-# 107 "Lexer.fs"
+# 107 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 1 -> ( 
-# 42 "Lexer.fsl"
+# 42 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  lexbuf.EndPos <- lexbuf.EndPos.NextLine; tokenize lexbuf 
-# 112 "Lexer.fs"
+# 112 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 2 -> ( 
-# 43 "Lexer.fsl"
+# 43 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  INT<| Int32.Parse(Encoding.UTF8.GetString(lexbuf.Lexeme)) 
-# 117 "Lexer.fs"
+# 117 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 3 -> ( 
-# 44 "Lexer.fsl"
+# 44 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  LP  
-# 122 "Lexer.fs"
+# 122 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 4 -> ( 
-# 45 "Lexer.fsl"
+# 45 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  RP  
-# 127 "Lexer.fs"
+# 127 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 5 -> ( 
-# 46 "Lexer.fsl"
+# 46 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  LSP 
-# 132 "Lexer.fs"
+# 132 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 6 -> ( 
-# 47 "Lexer.fsl"
+# 47 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  RSP 
-# 137 "Lexer.fs"
+# 137 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 7 -> ( 
-# 48 "Lexer.fsl"
+# 48 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  LCP 
-# 142 "Lexer.fs"
+# 142 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 8 -> ( 
-# 49 "Lexer.fsl"
+# 49 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  RCP 
-# 147 "Lexer.fs"
+# 147 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 9 -> ( 
-# 50 "Lexer.fsl"
+# 50 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  COMMA 
-# 152 "Lexer.fs"
+# 152 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 10 -> ( 
-# 51 "Lexer.fsl"
+# 51 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  SEMI  
-# 157 "Lexer.fs"
+# 157 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 11 -> ( 
-# 52 "Lexer.fsl"
+# 52 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  COLON 
-# 162 "Lexer.fs"
+# 162 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 12 -> ( 
-# 53 "Lexer.fsl"
+# 53 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  BAR 
-# 167 "Lexer.fs"
+# 167 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 13 -> ( 
-# 54 "Lexer.fsl"
+# 54 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  TO 
-# 172 "Lexer.fs"
+# 172 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 14 -> ( 
-# 55 "Lexer.fsl"
+# 55 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  ASG   
-# 177 "Lexer.fs"
+# 177 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 15 -> ( 
-# 56 "Lexer.fsl"
+# 56 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  NEG 
-# 182 "Lexer.fs"
+# 182 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 16 -> ( 
-# 57 "Lexer.fsl"
+# 57 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  AND 
-# 187 "Lexer.fs"
+# 187 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 17 -> ( 
-# 58 "Lexer.fsl"
+# 58 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  NEQ 
-# 192 "Lexer.fs"
+# 192 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 18 -> ( 
-# 59 "Lexer.fsl"
+# 59 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  LT 
-# 197 "Lexer.fs"
+# 197 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 19 -> ( 
-# 60 "Lexer.fsl"
+# 60 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  GT 
-# 202 "Lexer.fs"
+# 202 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 20 -> ( 
-# 61 "Lexer.fsl"
+# 61 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  LE 
-# 207 "Lexer.fs"
+# 207 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 21 -> ( 
-# 62 "Lexer.fsl"
+# 62 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  TIMES 
-# 212 "Lexer.fs"
+# 212 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 22 -> ( 
-# 63 "Lexer.fsl"
+# 63 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  MINUS 
-# 217 "Lexer.fs"
+# 217 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 23 -> ( 
-# 64 "Lexer.fsl"
+# 64 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  EQ 
-# 222 "Lexer.fs"
+# 222 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 24 -> ( 
-# 65 "Lexer.fsl"
+# 65 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  PLUS 
-# 227 "Lexer.fs"
+# 227 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 25 -> ( 
-# 66 "Lexer.fsl"
+# 66 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  keyword(Encoding.UTF8.GetString(lexbuf.Lexeme)) 
-# 232 "Lexer.fs"
+# 232 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | 26 -> ( 
-# 67 "Lexer.fsl"
+# 67 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fsl"
                                  EOF 
-# 237 "Lexer.fs"
+# 237 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
           )
   | _ -> failwith "tokenize"
 
-# 3000000 "Lexer.fs"
+# 3000000 "C:\Users\nick\Documents\GitHub\AFPProjects\GuardedCommands\GuardedCommands\Lexer.fs"
