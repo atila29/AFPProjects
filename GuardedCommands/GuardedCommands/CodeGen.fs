@@ -60,6 +60,8 @@ module CodeGeneration =
                                           | _    -> failwith "CE: this case is not possible"
                                 CE vEnv fEnv e1 @ CE vEnv fEnv e2 @ ins 
 
+       //| Apply(fname, es)    -> es |> List.rev |> CE vEnv fEnv 
+
        | _            -> failwith "CE: not supported yet"
        
 
@@ -83,6 +85,7 @@ module CodeGeneration =
       let code = [INCSP 1]
       (newEnv, code)
 
+ 
                       
 /// CS vEnv fEnv s gives the code for a statement s on the basis of a variable and a function environment                          
    let rec CS vEnv fEnv = function
@@ -105,12 +108,27 @@ module CodeGeneration =
                                let stmSkipLabel = newLabel()
                                CE vEnv fEnv e @ [IFZERO stmSkipLabel] @ CSs vEnv fEnv s @ [GOTO startLabel; Label stmSkipLabel]
                            ) |> List.collect id)
+       
+       | Return(Some(exp)) ->   let (_, m) = vEnv
+                                CE vEnv fEnv exp @ [RET m]
 
        | _              -> failwith "CS: this statement is not supported yet"
 
    and CSs vEnv fEnv stms = List.collect (CS vEnv fEnv) stms 
 
 
+   and CF vEnv fEnv fdec = 
+        match fdec with
+        | FunDec(tOpt, name, paramL, stm) -> match Map.tryFind name fEnv with
+                                                | Some(label, typ, paramDecs) ->    let rec varCode vars env code =
+                                                                                        match vars with
+                                                                                        | v::vs -> let (newEnv, c) = allocate LocVar v env
+                                                                                                   varCode vs env (code @ c)
+                                                                                        | []    -> (env, code)
+                                                                                    let lEnv, code = varCode paramDecs vEnv []
+                                                                                    [label] @ code @ CS lEnv fEnv stm
+                                                | _ -> failwith "not declared"
+        | _ -> failwith "not valid function"
 
 (* ------------------------------------------------------------------- *)
 
@@ -125,14 +143,26 @@ module CodeGeneration =
              | VarDec (typ, var) -> let (vEnv1, code1) = allocate GloVar (typ, var) vEnv
                                     let (vEnv2, fEnv2, code2) = addv decr vEnv1 fEnv
                                     (vEnv2, fEnv2, code1 @ code2)
-             | FunDec (tyOpt, f, xs, body) -> failwith "makeGlobalEnvs: function/procedure declarations not supported yet"
+             | FunDec (tyOpt, f, paramDecs, body) -> let vardecs = (paramDecs |> List.map (fun p -> 
+                                                                                        match p with
+                                                                                        | VarDec(t, n) -> (t, n)
+                                                                                        | _ -> failwith "Only variable declarations supported in functions"))
+                                                     addv decr vEnv (Map.add f (newLabel(), tyOpt, vardecs) fEnv)
        addv decs (Map.empty, 0) Map.empty
+
+    //let rec make_func_decs gvEnv fEnv decs =
+    //    match decs with
+    //    | (VarDec _)::ds -> make_func_decs gvEnv fEnv ds
+    //    | FuncDec(tOpt, name, parameters, body) -> 
+    //        let label = newLabel()
+
 
 /// CP prog gives the code for a program prog
    let CP (P(decs,stms)) = 
        let _ = resetLabels ()
        let ((gvM,_) as gvEnv, fEnv, initCode) = makeGlobalEnvs decs
-       initCode @ CSs gvEnv fEnv stms @ [STOP]     
+       //let func_decs = make_func_decs gvEnv fEnv decs
+       initCode @ CSs gvEnv fEnv stms @ [STOP]
 
 
 
