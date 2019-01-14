@@ -37,7 +37,7 @@ module TypeCheck =
 
    and tcNaryFunction gtenv ltenv f es =
         let (argtypes, rtype) = match Map.tryFind f gtenv with
-                                | Some(FTyp(argtypes, rtype)) when rtype.IsSome -> (argtypes, rtype.Value)
+                                | Some(FTyp(types, Some(rtype))) -> (types, rtype)
                                 | _ -> failwith ("function " + f + " not defined or is procedure")
         if not (List.forall2 (fun a e -> a = tcE gtenv ltenv e) argtypes es)
         then failwith "argument and parameter types does not match"
