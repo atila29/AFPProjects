@@ -66,7 +66,8 @@ module TypeCheck =
                          | Ass(acc,e) -> if tcA gtenv ltenv acc = tcE gtenv ltenv e 
                                          then ()
                                          else failwith "illtyped assignment"                                
-                         | Block([],stms) -> List.iter (tcS gtenv ltenv) stms  // Task 4.2 (include local declarations on block)
+                         | Block([],stms) -> List.iter (tcS gtenv ltenv) stms
+                         | Block(decs,stms) -> List.iter (tcS gtenv (tcLDecs gtenv ltenv decs)) stms
                          // Task 3.6
                          | Alt(GC(alts)) | Do(GC(alts)) ->  let es, stms = List.unzip alts
                                                             if not (List.forall (fun e -> tcE gtenv ltenv e = BTyp) es)
@@ -85,26 +86,34 @@ module TypeCheck =
                       // - the formal parameters are different (Done)
                       // - every return statement has declared return type
                       // - statement stm is well-typed (Done)
-                      | FunDec(Some(t),f,decs,stm) -> let rec cOnlyVarDec = function 
+                      | FunDec(Some(t),f,decs,stm) -> let rec paramTypes = function 
+                                                        | VarDec(dt, dn)::ds -> dt::(paramTypes ds)
+                                                        | d::ds -> paramTypes ds
                                                         | [] -> []
-                                                        | VarDec(dt, dn)::ds -> (dt, dn)::(cOnlyVarDec ds)
-                                                        | _ -> failwith ("locally defined functions not supported (in function " + f + ")")
-                                                      let lDecTyp, lDecName = List.unzip(cOnlyVarDec decs)
-                                                      let ltenv = Map.ofList(List.zip lDecName lDecTyp)
-                                                      if ltenv.Count <> decs.Length
+                                                      let paramTypes = paramTypes decs
+                                                      let ltenv = tcLDecs gtenv Map.empty decs 
+                                                      if ltenv.Count <> decs.Length  // Slettes? Ikke relevant for typecheck
                                                       then failwith ("identical parameters defined in function " + f)
-                                                      let ftyp = FTyp(lDecTyp, Some(t))
+                                                      let ftyp = FTyp(paramTypes, Some(t))
+                                                      let gtenv = Map.add f ftyp gtenv // Add to gtenv to allow for recursive functions
                                                       tcS gtenv ltenv stm
-                                                      Map.add f ftyp gtenv
+                                                      gtenv
 
                                                            
-//// checks well-typeness of a global declaration list, and returns new global declarations
+//// checks well-typeness of a global declaration list, and returns new global type environment
    and tcGDecs gtenv = function
                        | dec::decs -> tcGDecs (tcGDec gtenv dec) decs
                        | _         -> gtenv
 
+/// checks well-typeness of a local declaration, and returns new local type environment
+   and tcLDec gtenv ltenv = function
+                            | VarDec(t,s) -> Map.add s t ltenv
+                            | _ -> failwith "only local variable declarations supported"
 
-
+/// checks well-typeness of a local declaration list, and returns new local type environment
+   and tcLDecs gtenv ltenv = function
+                             | dec::decs -> tcLDecs gtenv (tcLDec gtenv ltenv dec) decs
+                             | _ -> ltenv
 
 /// tcP prog checks the well-typeness of a program prog
    and tcP(P(decs, stms)) = let gtenv = tcGDecs Map.empty decs
