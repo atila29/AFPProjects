@@ -94,6 +94,16 @@ module CodeGeneration =
 
        | Block([],stms) -> CSs vEnv fEnv stms
 
+       | Block(decs,stms) -> let rec lVarCode lvEnv code decs =
+                                match decs with
+                                | d::ds -> match d with 
+                                           | VarDec(typ,name) -> let (newEnv, newCode) = allocate LocVar (typ, name) lvEnv
+                                                                 lVarCode newEnv (code @ newCode) ds
+                                           | _ -> failwith "only variable declarations allowed in a block"
+                                | [] -> (lvEnv, code)
+                             let (lvEnv, vCode) = lVarCode vEnv [] decs
+                             vCode @ CSs lvEnv fEnv stms @ [INCSP -decs.Length]
+
        | Alt(GC([]))    -> [CSTI -1; STOP]
 
        | Alt(GC(alts))  -> let endLabel = newLabel()
@@ -118,13 +128,13 @@ module CodeGeneration =
    /// CF vEnv fEnv gives code for a global function based on a function declaration
    let CF vEnv (fEnv : funEnv) = function
         | FunDec(tOpt, name, paramL, stm) -> match Map.tryFind name fEnv with
-                                                | Some(label, typ, paramDecs) -> let rec paramCode pDecs lVEnv code =
+                                                | Some(label, typ, paramDecs) -> let rec paramCode pDecs lVEnv =
                                                                                     match pDecs with
-                                                                                        | v::vs -> let (newEnv, c) = allocate LocVar v lVEnv
-                                                                                                   paramCode vs lVEnv (code @ c)
-                                                                                        | []    -> (lVEnv, code)
-                                                                                 let lEnv, code = paramCode paramDecs vEnv []
-                                                                                 [Label label] @ code @ CS lEnv fEnv stm
+                                                                                        | v::vs -> let (newEnv, _) = allocate LocVar v lVEnv
+                                                                                                   paramCode vs newEnv
+                                                                                        | []    -> lVEnv
+                                                                                 let lEnv = paramCode paramDecs vEnv
+                                                                                 [Label label] @ CS lEnv fEnv stm
                                                 | _ -> failwith "function not declared"
         | _ -> failwith "not valid function"
    
