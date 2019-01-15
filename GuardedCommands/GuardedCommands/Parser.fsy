@@ -14,12 +14,14 @@ open GuardedCommands.Frontend.AST
 %token PRINT ASG SKIP ABORT
 %token EOF
 %token HIGH
+%token CIRCUMFLEX AMPERSAND
 
 %left AND
 %nonassoc NEG
 %left EQ LE LT GT NEQ
 %left PLUS MINUS 
 %left TIMES
+%nonassoc CIRCUMFLEX AMPERSAND
 
 %start Main Prog 
 %type <Exp> Exp
@@ -45,8 +47,12 @@ BasicTyp:
     BTYP                              { BTyp }
   | ITYP                              { ITyp } 
 
+PointerTyp:
+  | CIRCUMFLEX Typ                    { PTyp($2) }
+
 Typ:
     BasicTyp                          { $1 }
+  | PointerTyp                        { $1 }
 
 Dec: 
     NAME COLON Typ                    { VarDec($3,$1) }
@@ -56,11 +62,12 @@ DecL:
    | DecList                          { $1 }
 
 DecList: 
-   | Dec                              { [$1] }
+     Dec                              { [$1] }
    | Dec COMMA DecList                { $1 :: $3 }
 
 Access:
     NAME                              { AVar $1 }
+  | Exp CIRCUMFLEX                    { ADeref $1 }
       
 Stm:
     PRINT Exp                         { PrintLn $2 }
@@ -89,6 +96,7 @@ GCList:
 
 Exp:
     Access                            { Access $1 }
+  | AMPERSAND Access                  { Addr $2 }
   | INT                               { N $1 }
   | BOOL                              { B $1 }       
   | LP Exp RP                         { $2 } 
