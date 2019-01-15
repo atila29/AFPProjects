@@ -63,6 +63,8 @@ rule tokenize =
   | "-"         { MINUS }
   | "="         { EQ }
   | "+"         { PLUS }   
+  | "^"			{ CIRCUMFLEX }
+  | "&"			{ AMPERSAND }
   | identifier  { keyword(Encoding.UTF8.GetString(lexbuf.Lexeme)) }
   | eof         { EOF }
 
