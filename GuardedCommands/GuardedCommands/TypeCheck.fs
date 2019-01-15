@@ -43,11 +43,13 @@ module TypeCheck =
    and tcA gtenv ltenv = 
          function 
          | AVar x         -> match Map.tryFind x ltenv with
-                             | None   -> match Map.tryFind x gtenv with
-                                         | None   -> failwith ("no declaration for : " + x)
-                                         | Some t -> t
-                             | Some t -> t            
-         | AIndex(acc, e) -> failwith "tcA: array indexing not supported yes"
+                              | None   -> match Map.tryFind x gtenv with
+                                          | None   -> failwith ("no declaration for : " + x)
+                                          | Some t -> t
+                              | Some t -> t 
+         | AIndex(acc, e) -> match tcE gtenv ltenv e with
+                              | ITyp -> tcA gtenv ltenv acc
+                              | _ -> failwith "Index needs to be of type integer"
          | ADeref e       -> failwith "tcA: pointer dereferencing not supported yes"
  
 
@@ -55,9 +57,11 @@ module TypeCheck =
 /// for global and local variables and the possible type of return expressions 
    and tcS gtenv ltenv = function                           
                          | PrintLn e -> ignore(tcE gtenv ltenv e)
-                         | Ass(acc,e) -> if tcA gtenv ltenv acc = tcE gtenv ltenv e 
+                         | Ass(acc,e) -> if tcA gtenv ltenv acc = tcE gtenv ltenv e
                                          then ()
-                                         else failwith "illtyped assignment"                                
+                                         else 
+                                              printf "%A" (e)
+                                              failwith "illtyped assignment"
                          | Block([],stms) -> List.iter (tcS gtenv ltenv) stms  // Task 4.2 (include local declarations on block)
                          // Task 3.6
                          | Alt(GC(alts)) | Do(GC(alts)) ->  let es, stms = List.unzip alts

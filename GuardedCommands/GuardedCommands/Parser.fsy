@@ -43,10 +43,15 @@ Prog:
 
 BasicTyp:
     BTYP                              { BTyp }
-  | ITYP                              { ITyp } 
+  | ITYP                              { ITyp }
+
+ATyp:
+    BasicTyp LSP RSP                  { ATyp($1,None) }
+  | BasicTyp LSP INT RSP              { ATyp($1,Some($3)) }
 
 Typ:
     BasicTyp                          { $1 }
+  | ATyp                              { $1 }
 
 Dec: 
     NAME COLON Typ                    { VarDec($3,$1) }
@@ -61,6 +66,7 @@ DecList:
 
 Access:
     NAME                              { AVar $1 }
+  | Access LSP Exp RSP                { AIndex($1,$3) }
       
 Stm:
     PRINT Exp                         { PrintLn $2 }
