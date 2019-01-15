@@ -35,7 +35,7 @@ System.IO.Directory.SetCurrentDirectory __SOURCE_DIRECTORY__;;
 
 let a1Tree = parseFromFile "A1.gc"
 printf "%A" (CP a1Tree)
-execOpt "A1.gc"
+exec "A1.gc"
 
 
 // The Ex0.gc example:

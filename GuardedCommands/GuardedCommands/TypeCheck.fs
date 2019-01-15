@@ -48,7 +48,9 @@ module TypeCheck =
                                           | Some t -> t
                               | Some t -> t 
          | AIndex(acc, e) -> match tcE gtenv ltenv e with
-                              | ITyp -> tcA gtenv ltenv acc
+                              | ITyp -> match (tcA gtenv ltenv acc) with
+                                          | ATyp (t,_)-> t
+                                          | _ -> failwith "Should never happen?"
                               | _ -> failwith "Index needs to be of type integer"
          | ADeref e       -> failwith "tcA: pointer dereferencing not supported yes"
  
@@ -60,7 +62,7 @@ module TypeCheck =
                          | Ass(acc,e) -> if tcA gtenv ltenv acc = tcE gtenv ltenv e
                                          then ()
                                          else 
-                                              printf "%A" (e)
+                                              printf "------%A---%A-----" (tcA gtenv ltenv acc) (tcE gtenv ltenv e)
                                               failwith "illtyped assignment"
                          | Block([],stms) -> List.iter (tcS gtenv ltenv) stms  // Task 4.2 (include local declarations on block)
                          // Task 3.6
