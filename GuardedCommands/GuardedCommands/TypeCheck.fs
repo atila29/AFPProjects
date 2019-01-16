@@ -13,7 +13,7 @@ module TypeCheck =
          | N _              -> ITyp   
          | B _              -> BTyp   
          | Access acc       -> tcA gtenv ltenv acc     
-         | Addr acc         -> tcA gtenv ltenv acc 
+         | Addr acc         -> PTyp (tcA gtenv ltenv acc)
          | Apply(f,[e]) when List.exists (fun x -> x=f) ["-"; "!"]  
                             -> tcMonadic gtenv ltenv f e        
 
@@ -63,7 +63,10 @@ module TypeCheck =
                                           | ATyp (t,_)-> t
                                           | _ -> failwith "Should never happen?"
                               | _ -> failwith "Index needs to be of type integer"
-         | ADeref e       -> failwith "tcA: pointer dereferencing not supported yes"
+         | ADeref e       -> match e with
+                              //| Addr acc -> PTyp (tcA gtenv ltenv acc)
+                              | Access acc -> PTyp (tcA gtenv ltenv acc)
+                              | _        -> failwithf "%A^ is not a valid pointer" e
  
 
 /// tcS gtenv ltenv retOpt s checks the well-typeness of a statement s on the basis of type environments gtenv and ltenv
@@ -72,7 +75,7 @@ module TypeCheck =
                          | PrintLn e -> ignore(tcE gtenv ltenv e)
                          | Ass(acc,e) -> if tcA gtenv ltenv acc = tcE gtenv ltenv e
                                          then ()
-                                         else failwith "illtyped assignment"                                
+                                         else failwithf "illtyped assignment %A := %A" acc e
                          | Block([],stms) -> List.iter (tcS gtenv ltenv) stms
                          | Block(decs,stms) -> List.iter (tcS gtenv (tcLDecs gtenv ltenv decs)) stms
                          // Task 3.6

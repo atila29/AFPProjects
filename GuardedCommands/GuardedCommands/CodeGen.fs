@@ -65,6 +65,7 @@ module CodeGeneration =
                                                                 | _ -> failwith (String.concat " " [ "function"; fname; "not defined"])
                                 (es |> List.collect (CE vEnv fEnv)) @ [CALL (es.Length, label)] // @ [INCSP -1]
 
+       | Addr(acc)           -> CA vEnv fEnv acc
        | _            -> failwith "CE: not supported yet"
        
 
@@ -73,7 +74,7 @@ module CodeGeneration =
                                                    | (GloVar addr,_) -> [CSTI addr]
                                                    | (LocVar addr,_) -> [GETBP; CSTI addr; ADD]
                                | AIndex(acc, e) -> CA vEnv fEnv acc @ [LDI] @ CE vEnv fEnv e @ [ADD]
-                               | ADeref e       -> failwith "CA: pointer dereferencing not supported yet"
+                               | ADeref e       -> CE vEnv fEnv e @ [LDI]
 
   
 (* Bind declared variable in env and generate code to allocate it: *)   
