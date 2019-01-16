@@ -61,7 +61,10 @@ module CodeGeneration =
                                 CE vEnv fEnv e1 @ CE vEnv fEnv e2 @ ins 
 
        | Apply(fname, es)    -> let (_, m) = vEnv
-                                (es |> List.collect (CE vEnv fEnv)) @ [CALL(m, fname)] @ [INCSP -1]
+                                let label = match Map.tryFind fname fEnv with
+                                            | Some((flabel,_,_)) -> flabel
+                                            | _ -> failwith "function " + fname + " not defined"
+                                (es |> List.collect (CE vEnv fEnv)) @ [CALL (es.Length, label)] // @ [INCSP -1]
 
        | _            -> failwith "CE: not supported yet"
        
@@ -76,13 +79,14 @@ module CodeGeneration =
   
 (* Bind declared variable in env and generate code to allocate it: *)   
    let allocate (kind : int -> Var) (typ, x) (vEnv : varEnv)  =
-    let (env, fdepth) = vEnv 
+    let (env, fdepth) = vEnv
     match typ with
     | ATyp (ATyp _, _) -> 
       raise (Failure "allocate: array of arrays not permitted")
     | ATyp (t, Some i) -> failwith "allocate: array not supported yet"
     | _ -> 
       let newEnv = (Map.add x (kind fdepth, typ) env, fdepth+1)
+      printf "%s depth %i\n" x (fdepth+1)
       let code = [INCSP 1]
       (newEnv, code)
                       
@@ -97,7 +101,8 @@ module CodeGeneration =
        | Block(decs,stms) -> let rec lVarCode lvEnv code decs =
                                 match decs with
                                 | d::ds -> match d with 
-                                           | VarDec(typ,name) -> let (newEnv, newCode) = allocate LocVar (typ, name) lvEnv
+                                           | VarDec(typ,name) -> 
+                                                                 let (newEnv, newCode) = allocate LocVar (typ, name) lvEnv
                                                                  lVarCode newEnv (code @ newCode) ds
                                            | _ -> failwith "only variable declarations allowed in a block"
                                 | [] -> (lvEnv, code)
@@ -133,7 +138,7 @@ module CodeGeneration =
                                                                                         | v::vs -> let (newEnv, _) = allocate LocVar v lVEnv
                                                                                                    paramCode vs newEnv
                                                                                         | []    -> lVEnv
-                                                                                 let lEnv = paramCode paramDecs vEnv
+                                                                                 let lEnv = paramCode paramDecs (fst(vEnv), 0)
                                                                                  [Label label] @ CS lEnv fEnv stm
                                                 | _ -> failwith "function not declared"
         | _ -> failwith "not valid function"
@@ -166,7 +171,7 @@ module CodeGeneration =
                                                                                         match p with
                                                                                         | VarDec(t, n) -> (t, n)
                                                                                         | _ -> failwith "Only variable declarations supported in functions"))
-                                                     addDec decr vEnv (Map.add f (f, tyOpt, vardecs) fEnv)
+                                                     addDec decr vEnv (Map.add f (newLabel(), tyOpt, vardecs) fEnv)
        let (vEnv, fEnv, initCode) = addDec decs (Map.empty, 0) Map.empty
        let postCode = CFs vEnv fEnv decs
        (vEnv, fEnv, initCode, postCode)
@@ -176,8 +181,6 @@ module CodeGeneration =
    let CP (P(decs,stms)) = 
         let _ = resetLabels ()
         let ((gvM,_) as gvEnv, fEnv, initCode, postCode) = makeGlobalEnvs decs
-
-
         initCode @ CSs gvEnv fEnv stms @ [STOP] @ postCode
 
 
