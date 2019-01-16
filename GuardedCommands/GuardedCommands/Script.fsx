@@ -91,19 +91,24 @@ let ex6Code = CP ex6Tree;;
 let ex7Tree = parseFromFile "Ex7.gc";;
 let _ = tcP ex7Tree;;
 let ex7Code = CP ex7Tree
-//let ex7Ex = goTrace ex7Tree
+let ex7Ex = goTrace ex7Tree
 
+let a1Tree = parseFromFile "A1.gc";;
+let _ = tcP a1Tree;;
+let a1Code = CP a1Tree;;
+goTrace a1Tree
 
-
-//CP ex7Tree
-
+let a0Tree = parseFromFile "A0.gc";;
+let _ = tcP a0Tree;;
+let a0Code = CP a0Tree;;
+go a0Tree
 
 // Test of programs covered by the second task (Section 4.3):
 //List.iter exec ["Ex7.gc"; "fact.gc"; "factRec.gc"; "factCBV.gc"];;
-(*
+
 // Test of programs covered by the fourth task (Section 5.4):
 List.iter exec ["A0.gc"; "A1.gc"; "A2.gc"; "A3.gc"];;
-
+(*
 // Test of programs covered by the fifth task (Section 6.1):
 List.iter exec ["A4.gc"; "Swap.gc"; "QuickSortV1.gc"];;
 

@@ -60,10 +60,9 @@ module CodeGeneration =
                                           | _    -> failwith "CE: this case is not possible"
                                 CE vEnv fEnv e1 @ CE vEnv fEnv e2 @ ins 
 
-       | Apply(fname, es)    -> let (_, m) = vEnv
-                                let label = match Map.tryFind fname fEnv with
-                                            | Some((flabel,_,_)) -> flabel
-                                            | _ -> failwith "function " + fname + " not defined"
+       | Apply(fname, es)    -> let label = match Map.tryFind fname fEnv with
+                                                                | Some(flabel,_,_) -> flabel
+                                                                | _ -> failwith (String.concat " " [ "function"; fname; "not defined"])
                                 (es |> List.collect (CE vEnv fEnv)) @ [CALL (es.Length, label)] // @ [INCSP -1]
 
        | _            -> failwith "CE: not supported yet"
@@ -89,7 +88,6 @@ module CodeGeneration =
         (newEnv, code)
     | _ -> 
       let newEnv = (Map.add x (kind fdepth, typ) env, fdepth+1)
-      printf "%s depth %i\n" x (fdepth+1)
       let code = [INCSP 1]
       (newEnv, code)
                       
