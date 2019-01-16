@@ -14,11 +14,13 @@ module TypeCheck =
          | B _              -> BTyp   
          | Access acc       -> tcA gtenv ltenv acc     
          | Addr acc         -> tcA gtenv ltenv acc 
-         | Apply(f,[e]) when List.exists (fun x ->  x=f) ["-"; "!"]  
+         | Apply(f,[e]) when List.exists (fun x -> x=f) ["-"; "!"]  
                             -> tcMonadic gtenv ltenv f e        
 
-         | Apply(f,[e1;e2]) when List.exists (fun x ->  x=f) ["-";"+";"*"; "/"; "%"; "<"; ">"; "<>"; "="; "&&"; "||";]    
+         | Apply(f,[e1;e2]) when List.exists (fun x -> x=f) ["-";"+";"*"; "/"; "%"; "<"; ">"; "<>"; "="; "&&"; "||";]    
                             -> tcDyadic gtenv ltenv f e1 e2   
+         
+         | Apply(f, es)  -> tcNaryFunction gtenv ltenv f es
 
          | _                -> failwith "tcE: not supported yet"
 
@@ -33,8 +35,14 @@ module TypeCheck =
                                       | (o, BTyp, BTyp) when List.exists (fun x ->  x=o) ["<>";"&&";"||";"="]  -> BTyp 
                                       | _                      -> failwith("illegal/illtyped dyadic expression: " + f)
 
-   and tcNaryFunction gtenv ltenv f es = failwith "type check: functions not supported yet"
- 
+   and tcNaryFunction gtenv ltenv f es =
+        let (argtypes, rtype) = match Map.tryFind f gtenv with
+                                | Some(FTyp(types, Some(rtype))) -> (types, rtype)
+                                | _ -> failwith ("function " + f + " not defined or is procedure")
+        if not (List.forall2 (fun a e -> a = tcE gtenv ltenv e) argtypes es)
+        then failwith "argument and parameter types does not match"
+        rtype
+
    and tcNaryProcedure gtenv ltenv f es = failwith "type check: procedures not supported yet"
       
 
@@ -61,25 +69,55 @@ module TypeCheck =
                          | PrintLn e -> ignore(tcE gtenv ltenv e)
                          | Ass(acc,e) -> if tcA gtenv ltenv acc = tcE gtenv ltenv e
                                          then ()
-                                         else 
-                                              printf "------%A---%A-----" (tcA gtenv ltenv acc) (tcE gtenv ltenv e)
-                                              failwith "illtyped assignment"
-                         | Block([],stms) -> List.iter (tcS gtenv ltenv) stms  // Task 4.2 (include local declarations on block)
+                                         else failwith "illtyped assignment"                                
+                         | Block([],stms) -> List.iter (tcS gtenv ltenv) stms
+                         | Block(decs,stms) -> List.iter (tcS gtenv (tcLDecs gtenv ltenv decs)) stms
                          // Task 3.6
                          | Alt(GC(alts)) | Do(GC(alts)) ->  let es, stms = List.unzip alts
                                                             if not (List.forall (fun e -> tcE gtenv ltenv e = BTyp) es)
                                                             then failwith "guard is not a boolean expression"
                                                             stms |> List.iter (fun sl -> List.iter (tcS gtenv ltenv) sl)
+                         | Return None                  -> ()
+                         | Return (Some e)              -> ignore(tcE gtenv ltenv e)
                          | _        -> failwith "tcS: this statement is not supported yet"
 
-   and tcGDec gtenv = function  
-                      | VarDec(t,s)               -> Map.add s t gtenv
-                      | FunDec(topt,f, decs, stm) -> failwith "type check: function/procedure declarations not yet supported"
 
+//// checks well-typeness of global declarations, and returns new global declarations
+   and tcGDec gtenv = function  
+                      | VarDec(t,s)             -> Map.add s t gtenv
+                      | FunDec(None,f,decs,stm) -> failwith "procedures not supported"
+                      // A function is well-typed if:
+                      // - the formal parameters are different (Done)
+                      // - every return statement has declared return type
+                      // - statement stm is well-typed (Done)
+                      | FunDec(Some(t),f,decs,stm) -> let rec paramTypes = function 
+                                                        | VarDec(dt, dn)::ds -> dt::(paramTypes ds)
+                                                        | d::ds -> paramTypes ds
+                                                        | [] -> []
+                                                      let paramTypes = paramTypes decs
+                                                      let ltenv = tcLDecs gtenv Map.empty decs 
+                                                      if ltenv.Count <> decs.Length  // Slettes? Ikke relevant for typecheck
+                                                      then failwith ("identical parameters defined in function " + f)
+                                                      let ftyp = FTyp(paramTypes, Some(t))
+                                                      let gtenv = Map.add f ftyp gtenv // Add to gtenv to allow for recursive functions
+                                                      tcS gtenv ltenv stm
+                                                      gtenv
+
+                                                           
+//// checks well-typeness of a global declaration list, and returns new global type environment
    and tcGDecs gtenv = function
                        | dec::decs -> tcGDecs (tcGDec gtenv dec) decs
                        | _         -> gtenv
 
+/// checks well-typeness of a local declaration, and returns new local type environment
+   and tcLDec gtenv ltenv = function
+                            | VarDec(t,s) -> Map.add s t ltenv
+                            | _ -> failwith "only local variable declarations supported"
+
+/// checks well-typeness of a local declaration list, and returns new local type environment
+   and tcLDecs gtenv ltenv = function
+                             | dec::decs -> tcLDecs gtenv (tcLDec gtenv ltenv dec) decs
+                             | _ -> ltenv
 
 /// tcP prog checks the well-typeness of a program prog
    and tcP(P(decs, stms)) = let gtenv = tcGDecs Map.empty decs

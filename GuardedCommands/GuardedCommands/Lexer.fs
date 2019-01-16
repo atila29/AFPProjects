@@ -10,6 +10,8 @@ let keyword s =
     match s with
     | "bool"      -> BTYP
     | "int"       -> ITYP
+    | "function"  -> FUNCTION
+    | "return"    -> RETURN
     | "print"     -> PRINT 
     | "skip"      -> SKIP
     | "abort"     -> ABORT
@@ -23,7 +25,7 @@ let keyword s =
     | "false"     -> BOOL(false)
     | _           -> NAME s  
 
-# 26 "Lexer.fs"
+# 28 "Lexer.fs"
 let trans : uint16[] array = 
     [| 
    (* State 0 *)
@@ -100,139 +102,139 @@ and tokenize  (lexbuf : Microsoft.FSharp.Text.Lexing.LexBuffer<_>) = _fslex_toke
 and _fslex_tokenize  _fslex_state lexbuf =
   match _fslex_tables.Interpret(_fslex_state,lexbuf) with
   | 0 -> ( 
-# 39 "Lexer.fsl"
+# 41 "Lexer.fsl"
                                  tokenize lexbuf 
-# 105 "Lexer.fs"
+# 107 "Lexer.fs"
           )
   | 1 -> ( 
-# 40 "Lexer.fsl"
+# 42 "Lexer.fsl"
                                  lexbuf.EndPos <- lexbuf.EndPos.NextLine; tokenize lexbuf 
-# 110 "Lexer.fs"
+# 112 "Lexer.fs"
           )
   | 2 -> ( 
-# 41 "Lexer.fsl"
+# 43 "Lexer.fsl"
                                  INT<| Int32.Parse(Encoding.UTF8.GetString(lexbuf.Lexeme)) 
-# 115 "Lexer.fs"
+# 117 "Lexer.fs"
           )
   | 3 -> ( 
-# 42 "Lexer.fsl"
+# 44 "Lexer.fsl"
                                  LP  
-# 120 "Lexer.fs"
+# 122 "Lexer.fs"
           )
   | 4 -> ( 
-# 43 "Lexer.fsl"
+# 45 "Lexer.fsl"
                                  RP  
-# 125 "Lexer.fs"
+# 127 "Lexer.fs"
           )
   | 5 -> ( 
-# 44 "Lexer.fsl"
+# 46 "Lexer.fsl"
                                  LSP 
-# 130 "Lexer.fs"
+# 132 "Lexer.fs"
           )
   | 6 -> ( 
-# 45 "Lexer.fsl"
+# 47 "Lexer.fsl"
                                  RSP 
-# 135 "Lexer.fs"
+# 137 "Lexer.fs"
           )
   | 7 -> ( 
-# 46 "Lexer.fsl"
+# 48 "Lexer.fsl"
                                  LCP 
-# 140 "Lexer.fs"
+# 142 "Lexer.fs"
           )
   | 8 -> ( 
-# 47 "Lexer.fsl"
+# 49 "Lexer.fsl"
                                  RCP 
-# 145 "Lexer.fs"
+# 147 "Lexer.fs"
           )
   | 9 -> ( 
-# 48 "Lexer.fsl"
+# 50 "Lexer.fsl"
                                  COMMA 
-# 150 "Lexer.fs"
+# 152 "Lexer.fs"
           )
   | 10 -> ( 
-# 49 "Lexer.fsl"
+# 51 "Lexer.fsl"
                                  SEMI  
-# 155 "Lexer.fs"
+# 157 "Lexer.fs"
           )
   | 11 -> ( 
-# 50 "Lexer.fsl"
+# 52 "Lexer.fsl"
                                  COLON 
-# 160 "Lexer.fs"
+# 162 "Lexer.fs"
           )
   | 12 -> ( 
-# 51 "Lexer.fsl"
+# 53 "Lexer.fsl"
                                  BAR 
-# 165 "Lexer.fs"
+# 167 "Lexer.fs"
           )
   | 13 -> ( 
-# 52 "Lexer.fsl"
+# 54 "Lexer.fsl"
                                  TO 
-# 170 "Lexer.fs"
+# 172 "Lexer.fs"
           )
   | 14 -> ( 
-# 53 "Lexer.fsl"
+# 55 "Lexer.fsl"
                                  ASG   
-# 175 "Lexer.fs"
+# 177 "Lexer.fs"
           )
   | 15 -> ( 
-# 54 "Lexer.fsl"
+# 56 "Lexer.fsl"
                                  NEG 
-# 180 "Lexer.fs"
+# 182 "Lexer.fs"
           )
   | 16 -> ( 
-# 55 "Lexer.fsl"
+# 57 "Lexer.fsl"
                                  AND 
-# 185 "Lexer.fs"
+# 187 "Lexer.fs"
           )
   | 17 -> ( 
-# 56 "Lexer.fsl"
+# 58 "Lexer.fsl"
                                  NEQ 
-# 190 "Lexer.fs"
+# 192 "Lexer.fs"
           )
   | 18 -> ( 
-# 57 "Lexer.fsl"
+# 59 "Lexer.fsl"
                                  LT 
-# 195 "Lexer.fs"
+# 197 "Lexer.fs"
           )
   | 19 -> ( 
-# 58 "Lexer.fsl"
+# 60 "Lexer.fsl"
                                  GT 
-# 200 "Lexer.fs"
+# 202 "Lexer.fs"
           )
   | 20 -> ( 
-# 59 "Lexer.fsl"
+# 61 "Lexer.fsl"
                                  LE 
-# 205 "Lexer.fs"
+# 207 "Lexer.fs"
           )
   | 21 -> ( 
-# 60 "Lexer.fsl"
+# 62 "Lexer.fsl"
                                  TIMES 
-# 210 "Lexer.fs"
+# 212 "Lexer.fs"
           )
   | 22 -> ( 
-# 61 "Lexer.fsl"
+# 63 "Lexer.fsl"
                                  MINUS 
-# 215 "Lexer.fs"
+# 217 "Lexer.fs"
           )
   | 23 -> ( 
-# 62 "Lexer.fsl"
+# 64 "Lexer.fsl"
                                  EQ 
-# 220 "Lexer.fs"
+# 222 "Lexer.fs"
           )
   | 24 -> ( 
-# 63 "Lexer.fsl"
+# 65 "Lexer.fsl"
                                  PLUS 
-# 225 "Lexer.fs"
+# 227 "Lexer.fs"
           )
   | 25 -> ( 
-# 64 "Lexer.fsl"
+# 66 "Lexer.fsl"
                                  keyword(Encoding.UTF8.GetString(lexbuf.Lexeme)) 
-# 230 "Lexer.fs"
+# 232 "Lexer.fs"
           )
   | 26 -> ( 
-# 65 "Lexer.fsl"
+# 67 "Lexer.fsl"
                                  EOF 
-# 235 "Lexer.fs"
+# 237 "Lexer.fs"
           )
   | _ -> failwith "tokenize"
 

@@ -60,20 +60,26 @@ module CodeGeneration =
                                           | _    -> failwith "CE: this case is not possible"
                                 CE vEnv fEnv e1 @ CE vEnv fEnv e2 @ ins 
 
+       | Apply(fname, es)    -> let (_, m) = vEnv
+                                let label = match Map.tryFind fname fEnv with
+                                            | Some((flabel,_,_)) -> flabel
+                                            | _ -> failwith "function " + fname + " not defined"
+                                (es |> List.collect (CE vEnv fEnv)) @ [CALL (es.Length, label)] // @ [INCSP -1]
+
        | _            -> failwith "CE: not supported yet"
        
 
 /// CA vEnv fEnv acc gives the code for an access acc on the basis of a variable and a function environment
    and CA vEnv fEnv = function | AVar x         -> match Map.find x (fst vEnv) with
                                                    | (GloVar addr,_) -> [CSTI addr]
-                                                   | (LocVar addr,_) -> failwith "CA: Local variables not supported yet"
+                                                   | (LocVar addr,_) -> [GETBP; CSTI addr; ADD]
                                | AIndex(acc, e) -> CA vEnv fEnv acc @ [LDI] @ CE vEnv fEnv e @ [ADD]
                                | ADeref e       -> failwith "CA: pointer dereferencing not supported yet"
 
   
 (* Bind declared variable in env and generate code to allocate it: *)   
    let allocate (kind : int -> Var) (typ, x) (vEnv : varEnv)  =
-    let (env, fdepth) = vEnv 
+    let (env, fdepth) = vEnv
     match typ with
     | ATyp (ATyp _, _) -> 
       raise (Failure "allocate: array of arrays not permitted")
@@ -83,9 +89,9 @@ module CodeGeneration =
         (newEnv, code)
     | _ -> 
       let newEnv = (Map.add x (kind fdepth, typ) env, fdepth+1)
+      printf "%s depth %i\n" x (fdepth+1)
       let code = [INCSP 1]
       (newEnv, code)
-
                       
 /// CS vEnv fEnv s gives the code for a statement s on the basis of a variable and a function environment                          
    let rec CS vEnv fEnv = function
@@ -94,6 +100,17 @@ module CodeGeneration =
        | Ass(acc,e)     -> CA vEnv fEnv acc @ CE vEnv fEnv e @ [STI; INCSP -1]
 
        | Block([],stms) -> CSs vEnv fEnv stms
+
+       | Block(decs,stms) -> let rec lVarCode lvEnv code decs =
+                                match decs with
+                                | d::ds -> match d with 
+                                           | VarDec(typ,name) -> 
+                                                                 let (newEnv, newCode) = allocate LocVar (typ, name) lvEnv
+                                                                 lVarCode newEnv (code @ newCode) ds
+                                           | _ -> failwith "only variable declarations allowed in a block"
+                                | [] -> (lvEnv, code)
+                             let (lvEnv, vCode) = lVarCode vEnv [] decs
+                             vCode @ CSs lvEnv fEnv stms @ [INCSP -decs.Length]
 
        | Alt(GC([]))    -> [CSTI -1; STOP]
 
@@ -108,11 +125,36 @@ module CodeGeneration =
                                let stmSkipLabel = newLabel()
                                CE vEnv fEnv e @ [IFZERO stmSkipLabel] @ CSs vEnv fEnv s @ [GOTO startLabel; Label stmSkipLabel]
                            ) |> List.collect id)
+       
+       | Return(Some(exp)) ->   let (_, m) = vEnv
+                                CE vEnv fEnv exp @ [RET m]
 
        | _              -> failwith "CS: this statement is not supported yet"
 
    and CSs vEnv fEnv stms = List.collect (CS vEnv fEnv) stms 
 
+   /// CF vEnv fEnv gives code for a global function based on a function declaration
+   let CF vEnv (fEnv : funEnv) = function
+        | FunDec(tOpt, name, paramL, stm) -> match Map.tryFind name fEnv with
+                                                | Some(label, typ, paramDecs) -> let rec paramCode pDecs lVEnv =
+                                                                                    match pDecs with
+                                                                                        | v::vs -> let (newEnv, _) = allocate LocVar v lVEnv
+                                                                                                   paramCode vs newEnv
+                                                                                        | []    -> lVEnv
+                                                                                 let lEnv = paramCode paramDecs (fst(vEnv), 0)
+                                                                                 [Label label] @ CS lEnv fEnv stm
+                                                | _ -> failwith "function not declared"
+        | _ -> failwith "not valid function"
+   
+   /// CFs vEnv fEnv gives code for all function declarations contained in given list
+   let CFs vEnv (fEnv : funEnv) decs =
+        let rec addF = function
+            | dec::decs -> 
+                match dec with
+                | FunDec(_,_,_,_) -> (CF vEnv fEnv dec) @ addF decs
+                | _ -> addF decs
+            | _ -> []
+        addF decs
 
 
 (* ------------------------------------------------------------------- *)
@@ -120,22 +162,29 @@ module CodeGeneration =
 (* Build environments for global variables and functions *)
 
    let makeGlobalEnvs decs = 
-       let rec addv decs vEnv fEnv = 
+       let rec addDec decs vEnv fEnv = 
            match decs with 
            | []         -> (vEnv, fEnv, [])
            | dec::decr  -> 
              match dec with
-             | VarDec (typ, var) -> let (vEnv1, code1) = allocate GloVar (typ, var) vEnv
-                                    let (vEnv2, fEnv2, code2) = addv decr vEnv1 fEnv
-                                    (vEnv2, fEnv2, code1 @ code2)
-             | FunDec (tyOpt, f, xs, body) -> failwith "makeGlobalEnvs: function/procedure declarations not supported yet"
-       addv decs (Map.empty, 0) Map.empty
+             | VarDec (typ, var) -> let (vEnv1, initCode1) = allocate GloVar (typ, var) vEnv
+                                    let (vEnv2, fEnv2, initCode2) = addDec decr vEnv1 fEnv
+                                    (vEnv2, fEnv2, initCode1 @ initCode2)
+             | FunDec (tyOpt, f, paramDecs, body) -> let vardecs = (paramDecs |> List.map (fun p -> 
+                                                                                        match p with
+                                                                                        | VarDec(t, n) -> (t, n)
+                                                                                        | _ -> failwith "Only variable declarations supported in functions"))
+                                                     addDec decr vEnv (Map.add f (newLabel(), tyOpt, vardecs) fEnv)
+       let (vEnv, fEnv, initCode) = addDec decs (Map.empty, 0) Map.empty
+       let postCode = CFs vEnv fEnv decs
+       (vEnv, fEnv, initCode, postCode)
+         
 
 /// CP prog gives the code for a program prog
    let CP (P(decs,stms)) = 
-       let _ = resetLabels ()
-       let ((gvM,_) as gvEnv, fEnv, initCode) = makeGlobalEnvs decs
-       initCode @ CSs gvEnv fEnv stms @ [STOP]     
+        let _ = resetLabels ()
+        let ((gvM,_) as gvEnv, fEnv, initCode, postCode) = makeGlobalEnvs decs
+        initCode @ CSs gvEnv fEnv stms @ [STOP] @ postCode
 
 
 
