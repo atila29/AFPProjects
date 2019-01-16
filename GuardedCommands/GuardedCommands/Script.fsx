@@ -32,7 +32,7 @@ open VirtualMachine
 System.IO.Directory.SetCurrentDirectory __SOURCE_DIRECTORY__;;
 
 // The Ex0.gc example:
-
+(*
 
  let ex0Tree = parseFromFile "Ex0.gc";;
 
@@ -90,7 +90,7 @@ let ex6Code = CP ex6Tree;;
 
 let ex7Tree = parseFromFile "Ex7.gc";;
 let _ = tcP ex7Tree;;
-let ex7Code = CP ex7Tree
+let ex7Code = CP ex7Tree;;
 //let ex7Ex = goTrace ex7Tree
 
 
@@ -115,3 +115,11 @@ List.iter execOpt ["par1.gc"; "factImpPTyp.gc"; "QuickSortV2.gc"; "par2.gc"];;
 
 
 *)
+*)
+ let p1Tree = parseFromFile "Pointer1.gc"
+
+ let _ = tcP p1Tree;;
+
+ let p1Code = CP p1Tree;; 
+
+ let _ = goTrace p1Tree;;
