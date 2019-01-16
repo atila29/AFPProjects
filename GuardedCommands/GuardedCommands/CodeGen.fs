@@ -74,7 +74,7 @@ module CodeGeneration =
                                                    | (GloVar addr,_) -> [CSTI addr]
                                                    | (LocVar addr,_) -> [GETBP; CSTI addr; ADD]
                                | AIndex(acc, e) -> CA vEnv fEnv acc @ [LDI] @ CE vEnv fEnv e @ [ADD]
-                               | ADeref e       -> CE vEnv fEnv e @ [LDI]
+                               | ADeref e       -> CE vEnv fEnv e
 
   
 (* Bind declared variable in env and generate code to allocate it: *)   
