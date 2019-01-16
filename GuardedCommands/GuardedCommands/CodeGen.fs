@@ -63,7 +63,7 @@ module CodeGeneration =
        | Apply(fname, es)    -> let label = match Map.tryFind fname fEnv with
                                                                 | Some(flabel,_,_) -> flabel
                                                                 | _ -> failwith (String.concat " " [ "function"; fname; "not defined"])
-                                (es |> List.collect (CE vEnv fEnv)) @ [CALL (es.Length, label)] // @ [INCSP -1]
+                                (es |> List.collect (CE vEnv fEnv)) @ [CALL (es.Length, label)]
 
        | _            -> failwith "CE: not supported yet"
        
