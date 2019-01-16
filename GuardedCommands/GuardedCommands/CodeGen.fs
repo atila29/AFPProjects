@@ -73,7 +73,7 @@ module CodeGeneration =
    and CA vEnv fEnv = function | AVar x         -> match Map.find x (fst vEnv) with
                                                    | (GloVar addr,_) -> [CSTI addr]
                                                    | (LocVar addr,_) -> [GETBP; CSTI addr; ADD]
-                               | AIndex(acc, e) -> failwith "CA: array indexing not supported yet" 
+                               | AIndex(acc, e) -> CA vEnv fEnv acc @ [LDI] @ CE vEnv fEnv e @ [ADD]
                                | ADeref e       -> failwith "CA: pointer dereferencing not supported yet"
 
   
@@ -83,7 +83,10 @@ module CodeGeneration =
     match typ with
     | ATyp (ATyp _, _) -> 
       raise (Failure "allocate: array of arrays not permitted")
-    | ATyp (t, Some i) -> failwith "allocate: array not supported yet"
+    | ATyp (t, Some i) -> 
+        let newEnv = Map.add x (kind (fdepth+i), typ) env, fdepth+i+1
+        let code = [INCSP i; GETSP; CSTI (i-1); SUB]
+        (newEnv, code)
     | _ -> 
       let newEnv = (Map.add x (kind fdepth, typ) env, fdepth+1)
       printf "%s depth %i\n" x (fdepth+1)

@@ -51,11 +51,15 @@ module TypeCheck =
    and tcA gtenv ltenv = 
          function 
          | AVar x         -> match Map.tryFind x ltenv with
-                             | None   -> match Map.tryFind x gtenv with
-                                         | None   -> failwith ("no declaration for : " + x)
-                                         | Some t -> t
-                             | Some t -> t            
-         | AIndex(acc, e) -> failwith "tcA: array indexing not supported yes"
+                              | None   -> match Map.tryFind x gtenv with
+                                          | None   -> failwith ("no declaration for : " + x)
+                                          | Some t -> t
+                              | Some t -> t 
+         | AIndex(acc, e) -> match tcE gtenv ltenv e with
+                              | ITyp -> match (tcA gtenv ltenv acc) with
+                                          | ATyp (t,_)-> t
+                                          | _ -> failwith "Should never happen?"
+                              | _ -> failwith "Index needs to be of type integer"
          | ADeref e       -> failwith "tcA: pointer dereferencing not supported yes"
  
 
@@ -63,7 +67,7 @@ module TypeCheck =
 /// for global and local variables and the possible type of return expressions 
    and tcS gtenv ltenv = function                           
                          | PrintLn e -> ignore(tcE gtenv ltenv e)
-                         | Ass(acc,e) -> if tcA gtenv ltenv acc = tcE gtenv ltenv e 
+                         | Ass(acc,e) -> if tcA gtenv ltenv acc = tcE gtenv ltenv e
                                          then ()
                                          else failwith "illtyped assignment"                                
                          | Block([],stms) -> List.iter (tcS gtenv ltenv) stms
