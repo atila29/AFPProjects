@@ -17,7 +17,7 @@ module TypeCheck =
          | Apply(f,[e]) when List.exists (fun x -> x=f) ["-"; "!"]  
                             -> tcMonadic gtenv ltenv f e        
 
-         | Apply(f,[e1;e2]) when List.exists (fun x -> x=f) ["-";"+";"*"; "/"; "%"; "<"; ">"; "<>"; "="; "&&"; "||";]    
+         | Apply(f,[e1;e2]) when List.exists (fun x -> x=f) ["-";"+";"*"; "/"; "%"; "<"; ">"; "<>"; "="; "<="; ">="; "&&"; "||";]    
                             -> tcDyadic gtenv ltenv f e1 e2   
          
          | Apply(f, es)  -> tcNaryFunction gtenv ltenv f es
@@ -32,23 +32,32 @@ module TypeCheck =
    and tcDyadic gtenv ltenv f e1 e2 = printf "%A %A" (tcE gtenv ltenv e1) (tcE gtenv ltenv e2)
                                       match (f, tcE gtenv ltenv e1, tcE gtenv ltenv e2) with
                                       | (o, ITyp, ITyp) when List.exists (fun x ->  x=o) ["-";"+";"*";"/";"%"]  -> ITyp
-                                      | (o, ITyp, ITyp) when List.exists (fun x ->  x=o) ["<>";"<";">";"="]  -> BTyp
+                                      | (o, ITyp, ITyp) when List.exists (fun x ->  x=o) ["<>";"<";">";"=";">=";"<="]  -> BTyp
                                       | (o, BTyp, BTyp) when List.exists (fun x ->  x=o) ["<>";"&&";"||";"="]  -> BTyp 
                                       | _                      -> failwith("illegal/illtyped dyadic expression: " + f)
 
    and tcNaryFunction gtenv ltenv f es =
         let (argtypes, rtype) = match Map.tryFind f gtenv with
                                 | Some(FTyp(types, Some(rtype))) -> (types, rtype)
-                                | _ -> failwith ("function " + f + " not defined or is procedure")
-        if not (List.forall2 (fun a e -> match a, tcE gtenv ltenv e with
-                                            | (ATyp (aTyp, _), ATyp (eTyp, _)) -> aTyp = eTyp
-                                            | _ -> a = tcE gtenv ltenv e) 
-                                            argtypes es)
-        then failwith "argument and parameter types does not match"
+                                | _ -> failwith ("function " + f + " not defined")
+        tcArgs gtenv ltenv argtypes es
         rtype
 
-   and tcNaryProcedure gtenv ltenv f es = failwith "type check: procedures not supported yet"
-      
+   and tcNaryProcedure gtenv ltenv f es = 
+        let argtypes = match Map.tryFind f gtenv with
+                                | Some(FTyp(types, None)) -> types
+                                | _ -> failwith ("procedure " + f + " not defined")
+        tcArgs gtenv ltenv argtypes es
+        ()
+        
+   and tcArgs gtenv ltenv argTypes es = 
+        if not (List.forall2 (fun atyp e -> let etyp = tcE gtenv ltenv e 
+                                            match atyp, etyp with
+                                            | (ATyp (t1, _), ATyp (t2, _)) -> t1 = t2
+                                            | _ -> atyp = etyp
+                ) argTypes es)
+        then failwith "argument and parameter types do not match"
+
 
 /// tcA gtenv ltenv e gives the type for access acc on the basis of type environments gtenv and ltenv
 /// for global and local variables 
@@ -87,29 +96,25 @@ module TypeCheck =
                                                             stms |> List.iter (fun sl -> List.iter (tcS gtenv ltenv) sl)
                          | Return None                  -> ()
                          | Return (Some e)              -> ignore(tcE gtenv ltenv e)
-                         | _        -> failwith "tcS: this statement is not supported yet"
+                         | Call(f,es)                   -> tcNaryProcedure gtenv ltenv f es
 
 
 //// checks well-typeness of global declarations, and returns new global declarations
    and tcGDec gtenv = function  
-                      | VarDec(t,s)             -> Map.add s t gtenv
-                      | FunDec(None,f,decs,stm) -> failwith "procedures not supported"
-                      // A function is well-typed if:
-                      // - the formal parameters are different (Done)
-                      // - every return statement has declared return type
-                      // - statement stm is well-typed (Done)
-                      | FunDec(Some(t),f,decs,stm) -> let rec paramTypes = function 
-                                                        | VarDec(dt, dn)::ds -> dt::(paramTypes ds)
-                                                        | d::ds -> paramTypes ds
-                                                        | [] -> []
-                                                      let paramTypes = paramTypes decs
-                                                      let ltenv = tcLDecs gtenv Map.empty decs 
-                                                      if ltenv.Count <> decs.Length  // Slettes? Ikke relevant for typecheck
-                                                      then failwith ("identical parameters defined in function " + f)
-                                                      let ftyp = FTyp(paramTypes, Some(t))
-                                                      let gtenv = Map.add f ftyp gtenv // Add to gtenv to allow for recursive functions
-                                                      tcS gtenv ltenv stm
-                                                      gtenv
+                      | VarDec(t,s)              -> Map.add s t gtenv
+                      | FunDec(t,f,decs,stm)     -> let rec paramTypes = function 
+                                                    | VarDec(dt, dn)::ds -> dt::(paramTypes ds)
+                                                    | d::ds -> paramTypes ds
+                                                    | [] -> []
+                                                    let paramTypes = paramTypes decs
+                                                    let ltenv = tcLDecs gtenv Map.empty decs 
+                                                    if ltenv.Count <> decs.Length  // Slettes? Ikke relevant for typecheck
+                                                    then failwith ("identical parameters defined in function " + f)
+                                                    let ftyp = FTyp(paramTypes, t)
+                                                    // Add to gtenv before stm typecheck to allow for recursive functions
+                                                    let gtenv = Map.add f ftyp gtenv 
+                                                    tcS gtenv ltenv stm
+                                                    gtenv
 
                                                            
 //// checks well-typeness of a global declaration list, and returns new global type environment

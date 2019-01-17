@@ -119,6 +119,14 @@ let _ = tcP pointerTree;;
 let pointerCode = CP pointerTree;;
 goTrace pointerTree
 
+let a4Tree = parseFromFile "A4.gc";;
+let _ = tcP a4Tree;;
+let a4Code = CP a4Tree;;
+goTrace a4Tree
+
+let qsTree = parseFromFile "QuicksortV1.gc";;
+
+
 // Test of programs covered by the second task (Section 4.3):
 //List.iter exec ["Ex7.gc"; "fact.gc"; "factRec.gc"; "factCBV.gc"];;
 
