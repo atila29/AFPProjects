@@ -103,6 +103,10 @@ let _ = tcP a0Tree;;
 let a0Code = CP a0Tree;;
 go a0Tree
 
+let t0Tree = parseFromFile "T0.gc";;
+let _ = tcP t0Tree;;
+let t0Code = CP t0Tree;;
+
 // Test of programs covered by the second task (Section 4.3):
 //List.iter exec ["Ex7.gc"; "fact.gc"; "factRec.gc"; "factCBV.gc"];;
 

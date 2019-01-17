@@ -16,6 +16,7 @@ type token =
   | LT
   | GT
   | NEQ
+  | QM
   | COMMA
   | COLON
   | SEMI
@@ -60,6 +61,7 @@ type tokenId =
     | TOKEN_LT
     | TOKEN_GT
     | TOKEN_NEQ
+    | TOKEN_QM
     | TOKEN_COMMA
     | TOKEN_COLON
     | TOKEN_SEMI
@@ -95,6 +97,7 @@ type nonTerminalId =
     | NONTERM_Main
     | NONTERM_Prog
     | NONTERM_BasicTyp
+    | NONTERM_ATyp
     | NONTERM_Typ
     | NONTERM_Dec
     | NONTERM_DecL

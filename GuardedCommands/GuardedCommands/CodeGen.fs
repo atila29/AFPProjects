@@ -5,8 +5,8 @@ open System
 open Machine
 
 open GuardedCommands.Frontend.AST
-module CodeGeneration =
 
+module CodeGeneration =
 
 (* A global variable has an absolute address, a local one has an offset: *)
    type Var = 
@@ -64,6 +64,10 @@ module CodeGeneration =
                                                                 | Some(flabel,_,_) -> flabel
                                                                 | _ -> failwith (String.concat " " [ "function"; fname; "not defined"])
                                 (es |> List.collect (CE vEnv fEnv)) @ [CALL (es.Length, label)] // @ [INCSP -1]
+       | Apply(f, [ec; et; ef]) when f = "TENARY" ->    let labend  = newLabel()
+                                                        let labtrue = newLabel()
+                                                        CE vEnv fEnv ec @ [IFNZRO labtrue] @ CE vEnv fEnv ef
+                                                        @ [GOTO labend; Label labtrue] @ CE vEnv fEnv et @ [Label labend]
 
        | _            -> failwith "CE: not supported yet"
        
