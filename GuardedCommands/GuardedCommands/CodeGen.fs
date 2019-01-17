@@ -45,7 +45,7 @@ module CodeGeneration =
                                  @ [GOTO labend; Label labtrue; CSTI 1; Label labend]
 
 
-       | Apply(o,[e1;e2]) when List.exists (fun x -> o=x) ["-";"+"; "*"; "="; "<"]
+       | Apply(o,[e1;e2]) when List.exists (fun x -> o=x) ["-"; "+"; "*"; "%"; "/"; "="; "<"; ">"; "<="; ">="; "<>"]
                              -> let ins = match o with
                                           | "-" ->  [SUB]
                                           | "+"  -> [ADD]
@@ -56,14 +56,15 @@ module CodeGeneration =
                                           | "<>" -> [EQ; NOT]
                                           | "<"  -> [LT]
                                           | ">"  -> [SWAP; LT]
-                                          
+                                          | "<=" -> [SWAP; LT; NOT]
+                                          | ">=" -> [LT; NOT] 
                                           | _    -> failwith "CE: this case is not possible"
                                 CE vEnv fEnv e1 @ CE vEnv fEnv e2 @ ins 
 
        | Apply(fname, es)    -> let label = match Map.tryFind fname fEnv with
                                                                 | Some(flabel,_,_) -> flabel
                                                                 | _ -> failwith (String.concat " " [ "function"; fname; "not defined"])
-                                (es |> List.collect (CE vEnv fEnv)) @ [CALL (es.Length, label)] // @ [INCSP -1]
+                                (es |> List.collect (CE vEnv fEnv)) @ [CALL (es.Length, label)]
 
        | _            -> failwith "CE: not supported yet"
        
@@ -126,6 +127,11 @@ module CodeGeneration =
        
        | Return(Some(exp)) ->   let (_, m) = vEnv
                                 CE vEnv fEnv exp @ [RET m]
+        
+       | Call(pname,es)    -> let label = match Map.tryFind pname fEnv with
+                                           | Some(flabel,_,_) -> flabel
+                                           | _ -> failwith (String.concat " " [ "procedure"; pname; "not defined"])
+                              (es |> List.collect (CE vEnv fEnv)) @ [CALL (es.Length, label); INCSP -1]
 
        | _              -> failwith "CS: this statement is not supported yet"
 
@@ -133,16 +139,19 @@ module CodeGeneration =
 
    /// CF vEnv fEnv gives code for a global function based on a function declaration
    let CF vEnv (fEnv : funEnv) = function
-        | FunDec(tOpt, name, paramL, stm) -> match Map.tryFind name fEnv with
-                                                | Some(label, typ, paramDecs) -> let rec paramCode pDecs lVEnv =
-                                                                                    match pDecs with
-                                                                                        | v::vs -> let (newEnv, _) = allocate LocVar v lVEnv
-                                                                                                   paramCode vs newEnv
-                                                                                        | []    -> lVEnv
-                                                                                 let lEnv = paramCode paramDecs (fst(vEnv), 0)
-                                                                                 [Label label] @ CS lEnv fEnv stm
-                                                | _ -> failwith "function not declared"
-        | _ -> failwith "not valid function"
+        | FunDec(rtype, fname, _, stm) ->   match Map.tryFind fname fEnv with
+                                            | Some(label, _, paramDecs) -> let rec paramCode pDecs lVEnv =
+                                                                                match pDecs with
+                                                                                | v::vs -> let (newEnv, _) = allocate LocVar v lVEnv
+                                                                                           paramCode vs newEnv
+                                                                                | []    -> lVEnv
+                                                                           let lEnv = paramCode paramDecs (fst(vEnv), 0)
+                                                                           let code = [Label label] @ CS lEnv fEnv stm
+                                                                           match rtype with
+                                                                           | None ->  code @ [RET (paramDecs.Length - 1)]
+                                                                           | _ -> code
+                                            | _ -> failwith "function not declared"                                   
+        | _ -> failwith "not a function"
    
    /// CFs vEnv fEnv gives code for all function declarations contained in given list
    let CFs vEnv (fEnv : funEnv) decs =
