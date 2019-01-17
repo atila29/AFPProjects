@@ -126,6 +126,10 @@ goTrace a4Tree
 
 let qsTree = parseFromFile "QuicksortV1.gc";;
 
+let par2Tree = parseFromFile "par2.gc";;
+let _ = tcP par2Tree;;
+let par2Code = CP par2Tree;;
+goTrace par2Tree
 
 // Test of programs covered by the second task (Section 4.3):
 //List.iter exec ["Ex7.gc"; "fact.gc"; "factRec.gc"; "factCBV.gc"];;

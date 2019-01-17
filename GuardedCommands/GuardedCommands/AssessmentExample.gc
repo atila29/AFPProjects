@@ -1,5 +1,19 @@
 ﻿begin
-	x: int, x: int;
-	x := 5;
+	x: int, y: int;
 	print x;
+	{
+		z: int;
+		z := 5;
+		print z;
+		{
+			a: int;
+			z := 10;
+			a := 2;
+			x := 3;
+			print a
+		};
+		print z
+	};
+	x := 10;
+	print x
 end
