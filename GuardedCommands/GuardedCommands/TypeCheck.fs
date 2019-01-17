@@ -17,7 +17,7 @@ module TypeCheck =
          | Apply(f,[e]) when List.exists (fun x -> x=f) ["-"; "!"]  
                             -> tcMonadic gtenv ltenv f e        
 
-         | Apply(f,[e1;e2]) when List.exists (fun x -> x=f) ["-";"+";"*"; "/"; "%"; "<"; ">"; "<>"; "="; "&&"; "||";]    
+         | Apply(f,[e1;e2]) when List.exists (fun x -> x=f) ["-";"+";"*"; "/"; "%"; "<"; ">"; "<>"; "="; "<="; ">="; "&&"; "||";]    
                             -> tcDyadic gtenv ltenv f e1 e2   
          
          | Apply(f, es)  -> tcNaryFunction gtenv ltenv f es
@@ -31,7 +31,7 @@ module TypeCheck =
    
    and tcDyadic gtenv ltenv f e1 e2 = match (f, tcE gtenv ltenv e1, tcE gtenv ltenv e2) with
                                       | (o, ITyp, ITyp) when List.exists (fun x ->  x=o) ["-";"+";"*";"/";"%"]  -> ITyp
-                                      | (o, ITyp, ITyp) when List.exists (fun x ->  x=o) ["<>";"<";">";"="]  -> BTyp
+                                      | (o, ITyp, ITyp) when List.exists (fun x ->  x=o) ["<>";"<";">";"=";">=";"<="]  -> BTyp
                                       | (o, BTyp, BTyp) when List.exists (fun x ->  x=o) ["<>";"&&";"||";"="]  -> BTyp 
                                       | _                      -> failwith("illegal/illtyped dyadic expression: " + f)
 
@@ -92,7 +92,6 @@ module TypeCheck =
                          | Return None                  -> ()
                          | Return (Some e)              -> ignore(tcE gtenv ltenv e)
                          | Call(f,es)                   -> tcNaryProcedure gtenv ltenv f es
-                         | _        -> failwith "tcS: this statement is not supported yet"
 
 
 //// checks well-typeness of global declarations, and returns new global declarations

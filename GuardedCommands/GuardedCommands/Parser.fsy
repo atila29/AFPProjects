@@ -7,18 +7,18 @@ open GuardedCommands.Frontend.AST
 %token <string> STRING
 %token <string> NAME
 %token ITYP BTYP FTYP
-%token FUNCTION PROCEDURE RETURN
+%token FUNCTION RETURN PROCEDURE
 %token LP LCP LSP RP RCP RSP
 %token IF FI DO OD BEGIN END 
 %token COMMA COLON SEMI BAR TO
-%token NEG PLUS MINUS TIMES AND EQ LE LT GT NEQ
+%token NEG PLUS MINUS TIMES AND EQ LE LT GT GE NEQ
 %token PRINT ASG SKIP ABORT
 %token EOF
 %token HIGH
 
 %left AND
 %nonassoc NEG
-%left EQ LE LT GT NEQ
+%left EQ LE GE LT GT NEQ
 %left PLUS MINUS 
 %left TIMES
 
@@ -40,7 +40,7 @@ Main:
    Prog EOF                            { $1 }
 
 Prog:
-    BEGIN DecList SEMI StmL END        { P($2, $4) }
+    BEGIN DecL SEMI StmL END        { P($2, $4) }
   | BEGIN StmL END                     { P([], $2) }   
 
 BasicTyp:
@@ -59,10 +59,10 @@ Typ:
 Dec: 
     NAME COLON Typ                                  { VarDec($3,$1) }
   | FUNCTION NAME LP DecL RP COLON Typ EQ Stm       { FunDec(Some $7, $2, $4, $9) }
-  | PROCEDURE NAME LP DecL RP COLON EQ Stm          { FunDec(None, $2, $4, $8) }
-  
+  | PROCEDURE NAME LP DecL RP EQ Stm                { FunDec(None, $2, $4, $7) }
 
-DecL: 
+
+DecL:
                                       { [] }
    | DecList                          { $1 }
 
@@ -73,9 +73,10 @@ DecList:
 Access:
     NAME                              { AVar $1 }
   | Access LSP Exp RSP                { AIndex($1,$3) }
-      
+
 Stm:
     PRINT Exp                         { PrintLn $2 }
+  | NAME LP ExpL RP                   { Call($1, $3) }
   | Access ASG Exp                    { Ass($1,$3)  }
   | SKIP                              { Do (GC []) }
   | ABORT                             { Alt (GC []) } 
@@ -85,11 +86,10 @@ Stm:
   | DO GuardedCommand OD              { Do $2  }
   | RETURN Exp                        { Return(Some $2) }
   | RETURN                            { Return None }
-  | NAME LP ExpL RP                   { Call($1, $3) }
 
 StmL:
-                                      { [] } 
-  | StmList                           { $1 }    
+                                      { [] }
+  | StmList                           { $1 }
 
 StmList:
   | Stm                               { [$1] }
@@ -116,6 +116,7 @@ Exp:
   | Exp AND Exp                       { Apply("&&", [$1; $3])}
   | Exp EQ Exp                        { Apply("=", [$1; $3])}
   | Exp LE Exp                        { Apply("<=", [$1; $3])}
+  | Exp GE Exp                        { Apply(">=", [$1; $3])}
   | Exp GT Exp                        { Apply(">", [$1; $3])}
   | Exp LT Exp                        { Apply("<", [$1; $3])}
   | Exp NEQ Exp                       { Apply("<>", [$1; $3])}
