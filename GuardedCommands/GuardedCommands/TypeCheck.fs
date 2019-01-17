@@ -29,7 +29,8 @@ module TypeCheck =
                                    | ("!", BTyp) -> BTyp
                                    | _           -> failwith "illegal/illtyped monadic expression" 
    
-   and tcDyadic gtenv ltenv f e1 e2 = match (f, tcE gtenv ltenv e1, tcE gtenv ltenv e2) with
+   and tcDyadic gtenv ltenv f e1 e2 = printf "%A %A" (tcE gtenv ltenv e1) (tcE gtenv ltenv e2)
+                                      match (f, tcE gtenv ltenv e1, tcE gtenv ltenv e2) with
                                       | (o, ITyp, ITyp) when List.exists (fun x ->  x=o) ["-";"+";"*";"/";"%"]  -> ITyp
                                       | (o, ITyp, ITyp) when List.exists (fun x ->  x=o) ["<>";"<";">";"="]  -> BTyp
                                       | (o, BTyp, BTyp) when List.exists (fun x ->  x=o) ["<>";"&&";"||";"="]  -> BTyp 
@@ -64,8 +65,9 @@ module TypeCheck =
                                           | _ -> failwith "Should never happen?"
                               | _ -> failwith "Index needs to be of type integer"
          | ADeref e       -> match e with
-                              //| Addr acc -> PTyp (tcA gtenv ltenv acc)
-                              | Access acc -> PTyp (tcA gtenv ltenv acc)
+                              | Access acc -> match tcA gtenv ltenv acc with
+                                                | PTyp(typ) -> typ
+                                                | _ -> failwithf "%A cannot be dereferenced" acc
                               | _        -> failwithf "%A^ is not a valid pointer" e
  
 
