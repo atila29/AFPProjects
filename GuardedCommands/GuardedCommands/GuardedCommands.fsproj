@@ -88,6 +88,8 @@
     <None Include="par2.gc" />
     <None Include="packages.config" />
     <None Include="app.config" />
+    <None Include="AssessmentExample.gc" />
+    <None Include="pointer.gc" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
