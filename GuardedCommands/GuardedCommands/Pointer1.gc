@@ -1,0 +1,9 @@
+﻿begin 
+   v: int,
+   p: ^int;
+
+   v := 1;
+   p := &v;
+   print v;
+   print p^
+end

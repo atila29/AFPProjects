@@ -107,20 +107,52 @@ let t0Tree = parseFromFile "T0.gc";;
 let _ = tcP t0Tree;;
 let t0Code = CP t0Tree;;
 goTrace t0Tree
+let assessmentTree = parseFromFile "AssessmentExample.gc";;
+let _ = tcP assessmentTree;;
+let assessmentCode = CP assessmentTree;;
+goTrace assessmentTree
+
+
+let par1Tree = parseFromFile "par1.gc";;
+let _ = tcP par1Tree;;
+let par1Code = CP par1Tree;;
+goTrace par1Tree
+
+let pointerTree = parseFromFile "pointer.gc";;
+let _ = tcP pointerTree;;
+let pointerCode = CP pointerTree;;
+goTrace pointerTree
+
+let a4Tree = parseFromFile "A4.gc";;
+let _ = tcP a4Tree;;
+let a4Code = CP a4Tree;;
+goTrace a4Tree
+
+let qsTree = parseFromFile "QuicksortV1.gc";;
+
+
 // Test of programs covered by the second task (Section 4.3):
 //List.iter exec ["Ex7.gc"; "fact.gc"; "factRec.gc"; "factCBV.gc"];;
 
 // Test of programs covered by the fourth task (Section 5.4):
 List.iter exec ["A0.gc"; "A1.gc"; "A2.gc"; "A3.gc"];;
-(*
+
 // Test of programs covered by the fifth task (Section 6.1):
 List.iter exec ["A4.gc"; "Swap.gc"; "QuickSortV1.gc"];;
 
 // Test of programs covered by the fifth task (Section 7.4):
 List.iter exec ["par1.gc"; "factImpPTyp.gc"; "QuickSortV2.gc"; "par2.gc"];;
-
+(*
 // Test of programs covered by the fifth task using optimized compilation (Section 8.2):
 List.iter execOpt ["par1.gc"; "factImpPTyp.gc"; "QuickSortV2.gc"; "par2.gc"];;
 
 
 *)
+
+ let p1Tree = parseFromFile "Pointer1.gc"
+
+ let _ = tcP p1Tree;;
+
+ let p1Code = CP p1Tree;; 
+
+ let _ = goTrace p1Tree;;

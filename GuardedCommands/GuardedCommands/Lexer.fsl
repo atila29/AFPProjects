@@ -10,6 +10,7 @@ let keyword s =
     | "bool"      -> BTYP
     | "int"       -> ITYP
     | "function"  -> FUNCTION
+    | "procedure" -> PROCEDURE
     | "return"    -> RETURN
     | "print"     -> PRINT 
     | "skip"      -> SKIP
@@ -58,12 +59,15 @@ rule tokenize =
   | "<>"        { NEQ }
   | "<"         { LT }
   | ">"         { GT }
-  | "<="        { LE } 
+  | "<="        { LE }
+  | ">="        { GE }
   | "*"         { TIMES }
   | "-"         { MINUS }
   | "="         { EQ }
   | "+"         { PLUS }
   | "?"         { QM }
+  | "^"         { CIRCUMFLEX }
+  | "&"         { AMPERSAND }
   | identifier  { keyword(Encoding.UTF8.GetString(lexbuf.Lexeme)) }
   | eof         { EOF }
 
