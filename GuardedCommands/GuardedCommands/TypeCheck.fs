@@ -13,7 +13,7 @@ module TypeCheck =
          | N _              -> ITyp   
          | B _              -> BTyp   
          | Access acc       -> tcA gtenv ltenv acc     
-         | Addr acc         -> tcA gtenv ltenv acc
+         | Addr acc         -> PTyp(tcA gtenv ltenv acc)
          | Apply(f, [ec; et; ef]) when f = "__TENARY__" -> match (tcE gtenv ltenv ec, tcE gtenv ltenv et, tcE gtenv ltenv ef) with
                                                             | (BTyp, tt, tf) when tt=tf -> tt
                                                             | _ -> failwith "condition should be boolean, cases should have matching types"
