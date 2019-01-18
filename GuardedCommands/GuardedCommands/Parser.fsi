@@ -17,6 +17,7 @@ type token =
   | LE
   | LT
   | GT
+  | GE
   | NEQ
   | COMMA
   | COLON
@@ -36,8 +37,8 @@ type token =
   | RCP
   | RSP
   | FUNCTION
-  | PROCEDURE
   | RETURN
+  | PROCEDURE
   | ITYP
   | BTYP
   | FTYP
@@ -63,6 +64,7 @@ type tokenId =
     | TOKEN_LE
     | TOKEN_LT
     | TOKEN_GT
+    | TOKEN_GE
     | TOKEN_NEQ
     | TOKEN_COMMA
     | TOKEN_COLON
@@ -82,8 +84,8 @@ type tokenId =
     | TOKEN_RCP
     | TOKEN_RSP
     | TOKEN_FUNCTION
-    | TOKEN_PROCEDURE
     | TOKEN_RETURN
+    | TOKEN_PROCEDURE
     | TOKEN_ITYP
     | TOKEN_BTYP
     | TOKEN_FTYP
@@ -99,6 +101,7 @@ type nonTerminalId =
     | NONTERM_Main
     | NONTERM_Prog
     | NONTERM_BasicTyp
+    | NONTERM_ATyp
     | NONTERM_PointerTyp
     | NONTERM_Typ
     | NONTERM_Dec
