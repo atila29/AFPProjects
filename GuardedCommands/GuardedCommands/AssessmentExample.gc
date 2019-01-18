@@ -1,5 +1,25 @@
 ﻿begin
-	x: int, x: int;
-	x := 5;
-	print x;
+	x: int, y: int,
+	function add(a: int, b:int): int = 
+	{
+		c: int;
+		c := a + b;
+		print c;
+		return c
+	};
+	x := 10;
+	y := 20;
+	{
+		z: int;
+		z := add(x, y);
+		print z;
+		{
+			a: int;
+			a := add(z, add(x, y));
+			print a
+		};
+		print z
+	};
+	x := 10;
+	print x
 end
