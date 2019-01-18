@@ -65,8 +65,8 @@ module CodeGeneration =
                                                           CE vEnv fEnv ec @ [IFNZRO labtrue] @ CE vEnv fEnv ef
                                                           @ [GOTO labend; Label labtrue] @ CE vEnv fEnv et @ [Label labend]
        | Apply(fname, es)    -> let label = match Map.tryFind fname fEnv with
-                                            | Some(flabel,_,_) -> flabel
-                                            | _                -> failwith (String.concat " " [ "function"; fname; "not defined"])
+                                                                | Some(flabel,_,_) -> flabel
+                                                                | _ -> failwith (String.concat " " [ "function"; fname; "not defined"])
                                 (es |> List.collect (CE vEnv fEnv)) @ [CALL (es.Length, label)]
 
        | Addr(acc)           -> CA vEnv fEnv acc
@@ -75,34 +75,34 @@ module CodeGeneration =
 
 /// CA vEnv fEnv acc gives the code for an access acc on the basis of a variable and a function environment
    and CA vEnv fEnv = function | AVar x         -> match Map.find x (fst vEnv) with
-                                                       | (GloVar addr,_) -> [CSTI addr]
-                                                       | (LocVar addr,_) -> [GETBP; CSTI addr; ADD]
+                                                   | (GloVar addr,_) -> [CSTI (addr + 2)]
+                                                   | (LocVar addr,_) -> [GETBP; CSTI addr; ADD]
                                | AIndex(acc, e) -> CA vEnv fEnv acc @ [LDI] @ CE vEnv fEnv e @ [ADD]
                                | ADeref e       -> CE vEnv fEnv e
 
   
 (* Bind declared variable in env and generate code to allocate it: *)
    let allocate (kind : int -> Var) (typ, x) (vEnv : varEnv)  =
-       let (env, fdepth) = vEnv
-       match typ with
-       | ATyp (ATyp _, _) -> 
-           raise (Failure "allocate: array of arrays not permitted")
-       | ATyp (t, Some i) -> 
-           let newEnv = Map.add x (kind (fdepth+i), typ) env, fdepth+i+1
-           let code = [INCSP i; GETSP; CSTI (i-1); SUB]
-           (newEnv, code)
-       | _ -> 
-           let newEnv = (Map.add x (kind fdepth, typ) env, fdepth+1)
-           let code = [INCSP 1]
-           (newEnv, code)
+    let (env, fdepth) = vEnv
+    match typ with
+    | ATyp (ATyp _, _) -> 
+      raise (Failure "allocate: array of arrays not permitted")
+    | ATyp (t, Some i) -> 
+        let newEnv = Map.add x (kind (fdepth+i), typ) env, fdepth+i+1
+        let code = [INCSP i; GETSP; CSTI (i-1); SUB]
+        (newEnv, code)
+    | _ -> 
+      let newEnv = (Map.add x (kind fdepth, typ) env, fdepth+1)
+      let code = [INCSP 1]
+      (newEnv, code)
                       
 /// CS vEnv fEnv s gives the code for a statement s on the basis of a variable and a function environment                          
    let rec CS vEnv fEnv = function
-       | PrintLn e        -> CE vEnv fEnv e @ [PRINTI; INCSP -1] 
+       | PrintLn e      -> CE vEnv fEnv e @ [PRINTI; INCSP -1] 
 
-       | Ass(acc,e)       -> CA vEnv fEnv acc @ CE vEnv fEnv e @ [STI; INCSP -1]
+       | Ass(acc,e)     -> CA vEnv fEnv acc @ CE vEnv fEnv e @ [STI; INCSP -1]
 
-       | Block([],stms)   -> CSs vEnv fEnv stms
+       | Block([],stms) -> CSs vEnv fEnv stms
 
        | Block(decs,stms) -> let rec lVarCode lvEnv code decs =
                                 match decs with
@@ -110,8 +110,8 @@ module CodeGeneration =
                                            | VarDec(typ,name) -> 
                                                                  let (newEnv, newCode) = allocate LocVar (typ, name) lvEnv
                                                                  lVarCode newEnv (code @ newCode) ds
-                                           | _                -> failwith "only variable declarations allowed in a block"
-                                | []    -> (lvEnv, code)
+                                           | _ -> failwith "only variable declarations allowed in a block"
+                                | [] -> (lvEnv, code)
                              let (lvEnv, vCode) = lVarCode vEnv [] decs
                              vCode @ CSs lvEnv fEnv stms @ [INCSP -decs.Length]
 
@@ -195,7 +195,8 @@ module CodeGeneration =
    let CP (P(decs,stms)) = 
         let _ = resetLabels ()
         let ((gvM,_) as gvEnv, fEnv, initCode, postCode) = makeGlobalEnvs decs
-        initCode @ CSs gvEnv fEnv stms @ [STOP] @ postCode
+        let mainLabel = newLabel()
+        [CALL (0, mainLabel); Label mainLabel] @ initCode @ CSs gvEnv fEnv stms @ [STOP] @ postCode
 
 
 

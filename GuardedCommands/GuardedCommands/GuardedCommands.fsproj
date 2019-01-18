@@ -90,6 +90,8 @@
     <None Include="app.config" />
     <None Include="AssessmentExample.gc" />
     <None Include="pointer.gc" />
+    <None Include="FunctionWithoutReturn.gc" />
+    <None Include="ProcedureWithReturn.gc" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">

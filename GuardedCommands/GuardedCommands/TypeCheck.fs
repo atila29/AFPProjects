@@ -33,8 +33,7 @@ module TypeCheck =
                                    | ("!", BTyp) -> BTyp
                                    | _           -> failwith "illegal/illtyped monadic expression" 
    
-   and tcDyadic gtenv ltenv f e1 e2 = printf "%A %A" (tcE gtenv ltenv e1) (tcE gtenv ltenv e2)
-                                      match (f, tcE gtenv ltenv e1, tcE gtenv ltenv e2) with
+   and tcDyadic gtenv ltenv f e1 e2 = match (f, tcE gtenv ltenv e1, tcE gtenv ltenv e2) with
                                       | (o, ITyp, ITyp) when List.exists (fun x ->  x=o) ["-";"+";"*";"/";"%"]         -> ITyp
                                       | (o, ITyp, ITyp) when List.exists (fun x ->  x=o) ["<>";"<";">";"=";">=";"<="]  -> BTyp
                                       | (o, BTyp, BTyp) when List.exists (fun x ->  x=o) ["<>";"&&";"||";"="]          -> BTyp 
