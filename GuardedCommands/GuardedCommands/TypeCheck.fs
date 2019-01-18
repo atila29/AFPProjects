@@ -17,7 +17,6 @@ module TypeCheck =
          | Apply(f, [ec; et; ef]) when f = "__TERNARY__" -> match (tcE gtenv ltenv ec, tcE gtenv ltenv et, tcE gtenv ltenv ef) with
                                                             | (BTyp, tt, tf) when tt=tf -> tt
                                                             | _ -> failwith "condition should be boolean, cases should have matching types"
-         | Addr acc         -> PTyp (tcA gtenv ltenv acc)
          | Apply(f,[e]) when List.exists (fun x -> x=f) ["-"; "!"]  
                             -> tcMonadic gtenv ltenv f e        
 
