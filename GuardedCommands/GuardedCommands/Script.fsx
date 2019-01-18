@@ -132,6 +132,14 @@ let par2Code = CP par2Tree;;
 goTrace par2Tree
 
 
+let noReturnTree = parseFromFile "FunctionWithoutReturn.gc";;
+let _ = tcP noReturnTree;;
+let noReturnCode = CP noReturnTree;;
+goTrace noReturnTree
+
+let tree = parseFromFile "ProcedureWithReturn.gc";;
+goTrace (parseFromFile "ProcedureWithReturn.gc")
+
 // Test of programs covered by the first task (Section 3.7):
 List.iter exec ["Ex1.gc"; "Ex2.gc";"Ex3.gc"; "Ex4.gc"; "Ex5.gc"; "Ex6.gc"; "Skip.gc"];;
 
@@ -151,7 +159,12 @@ List.iter exec ["par1.gc"; "factImpPTyp.gc"; "QuickSortV2.gc"; "par2.gc"];;
 List.iter execOpt ["par1.gc"; "factImpPTyp.gc"; "QuickSortV2.gc"; "par2.gc"];;
 
 
+
+
 *)
+
+go (parseFromFile "QuickSortV2.gc")
+
 
  let p1Tree = parseFromFile "Pointer1.gc"
 

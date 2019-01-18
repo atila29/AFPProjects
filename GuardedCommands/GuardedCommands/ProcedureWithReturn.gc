@@ -1,0 +1,7 @@
+﻿begin
+	x: int,
+	procedure p(y: int) = {return 5};
+	x := 0;
+	p();
+	print x
+end
