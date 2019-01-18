@@ -1,0 +1,5 @@
+begin
+  x: int;
+  x := true ? 5 : 7;
+  print x
+end

@@ -64,7 +64,8 @@ rule tokenize =
   | "*"         { TIMES }
   | "-"         { MINUS }
   | "="         { EQ }
-  | "+"         { PLUS }   
+  | "+"         { PLUS }
+  | "?"         { QM }
   | "^"         { CIRCUMFLEX }
   | "&"         { AMPERSAND }
   | identifier  { keyword(Encoding.UTF8.GetString(lexbuf.Lexeme)) }

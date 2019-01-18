@@ -11,18 +11,22 @@ open GuardedCommands.Frontend.AST
 %token LP LCP LSP RP RCP RSP
 %token IF FI DO OD BEGIN END 
 %token COMMA COLON SEMI BAR TO
+%token QM
 %token NEG PLUS MINUS TIMES AND EQ LE LT GT GE NEQ
 %token PRINT ASG SKIP ABORT
 %token EOF
 %token HIGH
 %token CIRCUMFLEX AMPERSAND
 
+
+%left TERNARY QM
 %left AND
 %nonassoc NEG
 %left EQ LE GE LT GT NEQ
 %left PLUS MINUS 
 %left TIMES
 %nonassoc CIRCUMFLEX AMPERSAND
+
 
 %start Main Prog 
 %type <Exp> Exp
@@ -128,6 +132,7 @@ Exp:
   | Exp LT Exp                        { Apply("<", [$1; $3])}
   | Exp NEQ Exp                       { Apply("<>", [$1; $3])}
   | NAME LP ExpL RP                   { Apply($1, $3) }
+  | Exp QM Exp COLON Exp %prec TERNARY { Apply("__TERNARY__", [$1; $3; $5]) }
 
 ExpL:
                                       { [] } 

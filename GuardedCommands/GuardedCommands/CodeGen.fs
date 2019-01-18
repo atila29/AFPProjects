@@ -5,8 +5,8 @@ open System
 open Machine
 
 open GuardedCommands.Frontend.AST
-module CodeGeneration =
 
+module CodeGeneration =
 
 (* A global variable has an absolute address, a local one has an offset: *)
    type Var = 
@@ -60,7 +60,10 @@ module CodeGeneration =
                                           | ">=" -> [LT; NOT] 
                                           | _    -> failwith "CE: this case is not possible"
                                 CE vEnv fEnv e1 @ CE vEnv fEnv e2 @ ins 
-
+       | Apply(f, [ec; et; ef]) when f = "__TERNARY__" -> let labend  = newLabel()
+                                                          let labtrue = newLabel()
+                                                          CE vEnv fEnv ec @ [IFNZRO labtrue] @ CE vEnv fEnv ef
+                                                          @ [GOTO labend; Label labtrue] @ CE vEnv fEnv et @ [Label labend]
        | Apply(fname, es)    -> let label = match Map.tryFind fname fEnv with
                                                                 | Some(flabel,_,_) -> flabel
                                                                 | _ -> failwith (String.concat " " [ "function"; fname; "not defined"])
@@ -78,7 +81,7 @@ module CodeGeneration =
                                | ADeref e       -> CE vEnv fEnv e
 
   
-(* Bind declared variable in env and generate code to allocate it: *)   
+(* Bind declared variable in env and generate code to allocate it: *)
    let allocate (kind : int -> Var) (typ, x) (vEnv : varEnv)  =
     let (env, fdepth) = vEnv
     match typ with
