@@ -33,18 +33,6 @@ System.IO.Directory.SetCurrentDirectory __SOURCE_DIRECTORY__;;
 
 // The Ex0.gc example:
 
-
- let ex0Tree = parseFromFile "Ex0.gc";;
-
- let _ = tcP ex0Tree;;
-
- let ex0Code = CP ex0Tree;; 
-
- let _ = go ex0Tree;;
-
- let _ = goTrace ex0Tree;;
-
-
  //// Parsing of Ex1.gc
 
  //let ex1Tree = parseFromFile "Ex1.gc";;
@@ -103,12 +91,10 @@ let _ = tcP a0Tree;;
 let a0Code = CP a0Tree;;
 go a0Tree
 
-<<<<<<< HEAD
 let t0Tree = parseFromFile "T0.gc";;
 let _ = tcP t0Tree;;
 let t0Code = CP t0Tree;;
 goTrace t0Tree
-=======
 let assessmentTree = parseFromFile "AssessmentExample.gc";;
 let _ = tcP assessmentTree;;
 let assessmentCode = CP assessmentTree;;
@@ -133,7 +119,6 @@ goTrace a4Tree
 let qsTree = parseFromFile "QuicksortV1.gc";;
 
 
->>>>>>> master
 // Test of programs covered by the second task (Section 4.3):
 //List.iter exec ["Ex7.gc"; "fact.gc"; "factRec.gc"; "factCBV.gc"];;
 
