@@ -27,122 +27,9 @@ open CompilerUtil
 open Machine
 open VirtualMachine
 
-
-
 System.IO.Directory.SetCurrentDirectory __SOURCE_DIRECTORY__;;
 
 // The Ex0.gc example:
-
-
- let ex0Tree = parseFromFile "Ex0.gc";;
-
- let _ = tcP ex0Tree;;
-
- let ex0Code = CP ex0Tree;; 
-
- let _ = go ex0Tree;;
-
- let _ = goTrace ex0Tree;;
-
-
- //// Parsing of Ex1.gc
-
- //let ex1Tree = parseFromFile "Ex1.gc";;
-
- //let ex4Tree = parseFromFile "Ex4.gc"
- //let ex4Code = CP ex4Tree
-
- //// -- is typechecked as follows:
-
- //let _ = tcP ex1Tree;;
-
- //// obtain symbolic code:
- //let ex1Code = CP ex1Tree;; 
-
- //// -- is executed with trace as follows:
- //let stack = goTrace ex1Tree;;
-
- //// -- is executed as follows (no trace):
- //let sameStack = go ex1Tree;;
-
- //// "All in one" parse from file, type check, compile and run 
-
- //let _ = exec "Ex1.gc";;
-
- //let _ = exec "Ex2.gc";;
-
- //// Test of programs covered by the fifth task using optimized compilation (Section 8.2):
- //List.iter execOpt ["Ex1.gc"; "Ex2.gc"];;
-
- //// All programs relating to the basic version can be parsed:
- //let pts = List.map parseFromFile ["Ex1.gc"; "Ex2.gc";"Ex3.gc"; "Ex4.gc"; "Ex5.gc"; "Ex6.gc"; "Skip.gc"];;
-
- //// The parse tree for Ex3.gc
- //List.item 2 pts ;;
-
-
- //// Test of programs covered by the first task (Section 3.7):
- //List.iter exec ["Ex1.gc"; "Ex2.gc";"Ex3.gc"; "Ex4.gc"; "Ex5.gc"; "Ex6.gc"; "Skip.gc"];;
-
-let ex6Tree = parseFromFile "Ex6.gc";;
-let _ = tcP ex6Tree;;
-let ex6Code = CP ex6Tree;;
-
-let ex7Tree = parseFromFile "Ex7.gc";;
-let _ = tcP ex7Tree;;
-let ex7Code = CP ex7Tree
-let ex7Ex = goTrace ex7Tree
-
-let a1Tree = parseFromFile "A1.gc";;
-let _ = tcP a1Tree;;
-let a1Code = CP a1Tree;;
-goTrace a1Tree
-
-let a0Tree = parseFromFile "A0.gc";;
-let _ = tcP a0Tree;;
-let a0Code = CP a0Tree;;
-go a0Tree
-
-let t0Tree = parseFromFile "T0.gc";;
-let _ = tcP t0Tree;;
-let t0Code = CP t0Tree;;
-goTrace t0Tree
-let assessmentTree = parseFromFile "AssessmentExample.gc";;
-let _ = tcP assessmentTree;;
-let assessmentCode = CP assessmentTree;;
-goTrace assessmentTree
-
-
-let par1Tree = parseFromFile "par1.gc";;
-let _ = tcP par1Tree;;
-let par1Code = CP par1Tree;;
-goTrace par1Tree
-
-let pointerTree = parseFromFile "pointer.gc";;
-let _ = tcP pointerTree;;
-let pointerCode = CP pointerTree;;
-goTrace pointerTree
-
-let a4Tree = parseFromFile "A4.gc";;
-let _ = tcP a4Tree;;
-let a4Code = CP a4Tree;;
-goTrace a4Tree
-
-let qsTree = parseFromFile "QuicksortV1.gc";;
-
-let par2Tree = parseFromFile "par2.gc";;
-let _ = tcP par2Tree;;
-let par2Code = CP par2Tree;;
-goTrace par2Tree
-
-
-let noReturnTree = parseFromFile "FunctionWithoutReturn.gc";;
-let _ = tcP noReturnTree;;
-let noReturnCode = CP noReturnTree;;
-goTrace noReturnTree
-
-let tree = parseFromFile "ProcedureWithReturn.gc";;
-goTrace (parseFromFile "ProcedureWithReturn.gc")
 
 // Test of programs covered by the first task (Section 3.7):
 List.iter exec ["Ex1.gc"; "Ex2.gc";"Ex3.gc"; "Ex4.gc"; "Ex5.gc"; "Ex6.gc"; "Skip.gc"];;
@@ -158,22 +45,37 @@ List.iter exec ["A4.gc"; "Swap.gc"; "QuickSortV1.gc"];;
 
 // Test of programs covered by the fifth task (Section 7.4):
 List.iter exec ["par1.gc"; "factImpPTyp.gc"; "QuickSortV2.gc"; "par2.gc"];;
-(*
+
+// Custom tests
+
+// pointers
+let pointerTree = parseFromFile "pointer.gc";;
+let _ = tcP pointerTree;;
+let pointerCode = CP pointerTree;;
+goTrace pointerTree
+
+// Assesment
+let assessmentTree = parseFromFile "AssessmentExample.gc";;
+ignore (tcP assessmentTree)
+let assessmentCode = CP assessmentTree;;
+goTrace assessmentTree
+
+// Extensions
+
+// Ternary
+let ternaryTree = parseFromFile "T0.gc";;
+let _ = tcP ternaryTree;;
+let ternaryCode = CP ternaryTree;;
+goTrace ternaryTree
+
+/// BELOW THIS POINT: each is expected to fail.
+/// 
 // Test of programs covered by the fifth task using optimized compilation (Section 8.2):
 List.iter execOpt ["par1.gc"; "factImpPTyp.gc"; "QuickSortV2.gc"; "par2.gc"];;
+let noReturnTree = parseFromFile "FunctionWithoutReturn.gc";;
+let _ = tcP noReturnTree;;
+let noReturnCode = CP noReturnTree;;
+goTrace noReturnTree
 
-
-
-
-*)
-
-go (parseFromFile "QuickSortV2.gc")
-
-
- let p1Tree = parseFromFile "Pointer1.gc"
-
- let _ = tcP p1Tree;;
-
- let p1Code = CP p1Tree;; 
-
- let _ = goTrace p1Tree;;
+ignore (parseFromFile "ProcedureWithReturn.gc")
+goTrace (parseFromFile "ProcedureWithReturn.gc")
