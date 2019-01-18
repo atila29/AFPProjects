@@ -60,10 +60,10 @@ module CodeGeneration =
                                           | ">=" -> [LT; NOT] 
                                           | _    -> failwith "CE: this case is not possible"
                                 CE vEnv fEnv e1 @ CE vEnv fEnv e2 @ ins 
-       | Apply(f, [ec; et; ef]) when f = "__TENARY__" -> let labend  = newLabel()
-                                                         let labtrue = newLabel()
-                                                         CE vEnv fEnv ec @ [IFNZRO labtrue] @ CE vEnv fEnv ef
-                                                         @ [GOTO labend; Label labtrue] @ CE vEnv fEnv et @ [Label labend]
+       | Apply(f, [ec; et; ef]) when f = "__TERNARY__" -> let labend  = newLabel()
+                                                          let labtrue = newLabel()
+                                                          CE vEnv fEnv ec @ [IFNZRO labtrue] @ CE vEnv fEnv ef
+                                                          @ [GOTO labend; Label labtrue] @ CE vEnv fEnv et @ [Label labend]
        | Apply(fname, es)    -> let label = match Map.tryFind fname fEnv with
                                             | Some(flabel,_,_) -> flabel
                                             | _                -> failwith (String.concat " " [ "function"; fname; "not defined"])

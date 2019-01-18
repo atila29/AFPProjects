@@ -19,7 +19,7 @@ open GuardedCommands.Frontend.AST
 %token CIRCUMFLEX AMPERSAND
 
 
-%left TENARY QM
+%left TERNARY QM
 %left AND
 %nonassoc NEG
 %left EQ LE GE LT GT NEQ
@@ -132,7 +132,7 @@ Exp:
   | Exp LT Exp                        { Apply("<", [$1; $3])}
   | Exp NEQ Exp                       { Apply("<>", [$1; $3])}
   | NAME LP ExpL RP                   { Apply($1, $3) }
-  | Exp QM Exp COLON Exp %prec TENARY { Apply("__TENARY__", [$1; $3; $5]) }
+  | Exp QM Exp COLON Exp %prec TERNARY { Apply("__TERNARY__", [$1; $3; $5]) }
 
 ExpL:
                                       { [] } 
