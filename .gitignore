@@ -357,3 +357,9 @@ healthchecksdb
 Tree/.vs/Tree/v15/.suo
 *.suo
 *.cache
+GuardedCommands/GuardedCommands/Parser.fs
+GuardedCommands/GuardedCommands/Lexer.fs
+GuardedCommands/GuardedCommands/Parser.fsi
+GuardedCommands/GuardedCommands/Parser.fsyacc.output
+GuardedCommands/GuardedCommands/bin/Debug/GuardedCommands.XML
+GuardedCommands/GuardedCommands/bin/Debug/GuardedCommands.dll
