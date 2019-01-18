@@ -72,7 +72,7 @@ module CodeGeneration =
 
 /// CA vEnv fEnv acc gives the code for an access acc on the basis of a variable and a function environment
    and CA vEnv fEnv = function | AVar x         -> match Map.find x (fst vEnv) with
-                                                   | (GloVar addr,_) -> [CSTI addr]
+                                                   | (GloVar addr,_) -> [CSTI (addr + 2)]
                                                    | (LocVar addr,_) -> [GETBP; CSTI addr; ADD]
                                | AIndex(acc, e) -> CA vEnv fEnv acc @ [LDI] @ CE vEnv fEnv e @ [ADD]
                                | ADeref e       -> CE vEnv fEnv e
@@ -192,7 +192,8 @@ module CodeGeneration =
    let CP (P(decs,stms)) = 
         let _ = resetLabels ()
         let ((gvM,_) as gvEnv, fEnv, initCode, postCode) = makeGlobalEnvs decs
-        initCode @ CSs gvEnv fEnv stms @ [STOP] @ postCode
+        let mainLabel = newLabel()
+        [CALL (0, mainLabel); Label mainLabel] @ initCode @ CSs gvEnv fEnv stms @ [STOP] @ postCode
 
 
 
