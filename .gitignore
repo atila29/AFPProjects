@@ -5,9 +5,12 @@
 ### fsharp ###
 lib/debug
 lib/release
+Debug
 *.suo
 *.user
 obj
+bin
+/build/
 *.exe
 !.paket/paket.bootstrapper.exe
 
@@ -26,6 +29,7 @@ obj
 *.userprefs
 
 # Build results
+[Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
@@ -34,6 +38,7 @@ x86/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
+[Bb]in/
 [Oo]bj/
 [Ll]og/
 
@@ -191,16 +196,16 @@ publish/
 PublishScripts/
 
 # NuGet Packages
-#*.nupkg
+*.nupkg
 # The packages folder can be ignored because of Package Restore
-#**/[Pp]ackages/*
+**/[Pp]ackages/*
 # except build/, which is used as an MSBuild target.
-#!**/[Pp]ackages/build/
+!**/[Pp]ackages/build/
 # Uncomment if necessary however generally it will be regenerated when needed
 #!**/[Pp]ackages/repositories.config
 # NuGet v3's project.json files produces more ignorable files
-#*.nuget.props
-#*.nuget.targets
+*.nuget.props
+*.nuget.targets
 
 # Microsoft Azure Build Output
 csx/
@@ -357,6 +362,7 @@ healthchecksdb
 Tree/.vs/Tree/v15/.suo
 *.suo
 *.cache
+
 GuardedCommands/GuardedCommands/Parser.fs
 GuardedCommands/GuardedCommands/Lexer.fs
 GuardedCommands/GuardedCommands/Parser.fsi
