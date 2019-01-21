@@ -8,6 +8,7 @@ open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
+open Platform.Handlers
 
 // ---------------------------------
 // Models
@@ -42,7 +43,30 @@ module Views =
     let index (model : Message) =
         [
             partial()
-            p [] [ encodedText model.Text ]
+            //  <form action="/action_page.php">
+            //   First name:<br>
+            //   <input type="text" name="firstname" value="Mickey"><br>
+            //   Last name:<br>
+            //   <input type="text" name="lastname" value="Mouse"><br><br>
+            //   <input type="submit" value="Submit">
+            // </form> 
+            // id: int
+            //   title: string
+            //   description: string
+            //   teacher: string
+
+            form [_action "/submitrequest"; _method "post"] [
+                p [] [ encodedText "title" ]
+                input [_type "text"; _name "title"] //type="text" name="lastname"
+                p [] [ encodedText "description" ]
+                input [_type "text"; _name "description"]
+                p [] [ encodedText "teacher" ]
+                input [_type "text"; _name "teacher"]
+                br []
+                input [_type "submit"; _value "Request"]
+            ]
+
+            // p [] [ encodedText model.Text ]
         ] |> layout
 
 // ---------------------------------
@@ -62,6 +86,10 @@ let webApp =
                 route "/" >=> indexHandler "world"
                 routef "/hello/%s" indexHandler
             ]
+        POST >=> 
+            choose [
+                route "/submitrequest" >=> submitRequestHandler
+            ]        
         setStatusCode 404 >=> text "Not Found" ]
 
 // ---------------------------------
