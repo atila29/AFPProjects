@@ -78,41 +78,31 @@ module Views =
 //   </li>
 // </ul>
 
-    let partial () = ([
+    let partial () = [
         navbar()
         h1 [] [ encodedText "Platform" ]
-    ] |> layout)
+    ] 
 
-    let teacherView = ([
-        partial()
+    let teacherView = ( partial() @ [
+        
         teacherTemplate()
     ] |> layout)
     
-    let headOfStudyView = ([
-        partial()
+    let headOfStudyView = ( partial() @ [
         headOfStudyTemplate()
     ] |> layout)
 
-    let index (model : Message) =
-        [
-            partial()
-        ] |> layout
+    let index = partial() |> layout
 
 // ---------------------------------
 // Web app
 // ---------------------------------
 
-let indexHandler (name : string) =
-    let greetings = sprintf "Hello %s, from Giraffe!" name
-    let model     = { Text = greetings }
-    let view      = Views.index model
-    htmlView view
-
 let webApp =
     choose [
         GET >=>
             choose [
-                route "/" >=> indexHandler "world"
+                route "/" >=> htmlView Views.index
                 route "/teacher"  >=> htmlView Views.teacherView
                 route "/head" >=> htmlView Views.headOfStudyView
             ]
