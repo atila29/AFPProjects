@@ -77,5 +77,5 @@ let _ = tcP noReturnTree;;
 let noReturnCode = CP noReturnTree;;
 goTrace noReturnTree
 
-ignore (parseFromFile "ProcedureWithReturn.gc")
-goTrace (parseFromFile "ProcedureWithReturn.gc")
+ignore (parseFromFile "ProcedureWithReturn.gc")  // Parses successfully, but...
+goTrace (parseFromFile "ProcedureWithReturn.gc") // BEWARE - DOES NOT TERMINATE!
