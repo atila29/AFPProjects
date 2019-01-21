@@ -17,6 +17,7 @@
   <ItemGroup>
     <Compile Include="model/inputModels.fs"/>
     <Compile Include="handlers/handlers.fs"/>
+    <Compile Include="htmlViews.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

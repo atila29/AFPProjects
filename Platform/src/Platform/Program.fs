@@ -9,6 +9,7 @@ open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
 open Platform.Handlers
+open Platform.HtmlViews
 
 // ---------------------------------
 // Models
@@ -33,40 +34,68 @@ module Views =
                 link [ _rel  "stylesheet"
                        _type "text/css"
                        _href "/main.css" ]
+                link [ _rel  "stylesheet"
+                       _href "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" ]
+                link [ _rel  "stylesheet"
+                       _href "https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" ]
+                       //<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
+                        //<link rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
+
+
             ]
             body [] content
         ]
 
-    let partial () =
+    let navbar () = ([
+        ul [_class "nav nav-tabs bg-primary"] [
+            li [_class "nav-item"] [
+                a [ _class "nav-link active"; _href "/" ] [ str "index"]
+            ]
+            li [_class "nav-item"] [
+                a [ _class "nav-link active"; _href "/student" ] [ str "student" ]
+            ]
+            li [_class "nav-item"] [
+                a [ _class "nav-link active"; _href "/teacher" ] [ str "teacher" ]
+            ]
+            li [_class "nav-item"] [
+                a [ _class "nav-link active"; _href "/head" ] [ str "head of study" ]
+            ]
+        ]
+    ] |> layout)
+//     <!-- primary -->
+// <ul class="nav nav-tabs bg-primary">
+//   <li class="nav-item">
+//     <a class="nav-link active" href="#">Active</a>
+//   </li>
+//   <li class="nav-item">
+//     <a class="nav-link" href="#">Link</a>
+//   </li>
+//   <li class="nav-item">
+//     <a class="nav-link" href="#">Another link</a>
+//   </li>
+//   <li class="nav-item">
+//     <a class="nav-link disabled" href="#">Disabled</a>
+//   </li>
+// </ul>
+
+    let partial () = ([
+        navbar()
         h1 [] [ encodedText "Platform" ]
+    ] |> layout)
+
+    let teacherView = ([
+        partial()
+        teacherTemplate()
+    ] |> layout)
+    
+    let headOfStudyView = ([
+        partial()
+        headOfStudyTemplate()
+    ] |> layout)
 
     let index (model : Message) =
         [
             partial()
-            //  <form action="/action_page.php">
-            //   First name:<br>
-            //   <input type="text" name="firstname" value="Mickey"><br>
-            //   Last name:<br>
-            //   <input type="text" name="lastname" value="Mouse"><br><br>
-            //   <input type="submit" value="Submit">
-            // </form> 
-            // id: int
-            //   title: string
-            //   description: string
-            //   teacher: string
-
-            form [_action "/submitrequest"; _method "post"] [
-                p [] [ encodedText "title" ]
-                input [_type "text"; _name "title"] //type="text" name="lastname"
-                p [] [ encodedText "description" ]
-                input [_type "text"; _name "description"]
-                p [] [ encodedText "teacher" ]
-                input [_type "text"; _name "teacher"]
-                br []
-                input [_type "submit"; _value "Request"]
-            ]
-
-            // p [] [ encodedText model.Text ]
         ] |> layout
 
 // ---------------------------------
@@ -84,7 +113,8 @@ let webApp =
         GET >=>
             choose [
                 route "/" >=> indexHandler "world"
-                routef "/hello/%s" indexHandler
+                route "/teacher"  >=> htmlView Views.teacherView
+                route "/head" >=> htmlView Views.headOfStudyView
             ]
         POST >=> 
             choose [
