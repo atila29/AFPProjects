@@ -20,8 +20,8 @@
   <ItemGroup>
     <Compile Include="model/inputModels.fs" />
     <Compile Include="model/dataModels.fs" />
-    <Compile Include="handlers/handlers.fs" />
     <Compile Include="htmlViews.fs" />
+    <Compile Include="handlers.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

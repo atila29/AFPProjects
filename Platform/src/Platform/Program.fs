@@ -9,7 +9,6 @@ open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
 open Platform.Handlers
-open Platform.HtmlViews
 
 // ---------------------------------
 // Models
@@ -21,52 +20,17 @@ type Message =
     }
 
 // ---------------------------------
-// Views
-// ---------------------------------
-
-module Views =
-    open GiraffeViewEngine
-
-    let layout (content: XmlNode list) =
-        html [] [
-            head [] [
-                title []  [ encodedText "Platform" ]
-                link [ _rel  "stylesheet"
-                       _type "text/css"
-                       _href "/main.css" ]
-                link [ _rel  "stylesheet"
-                       _href "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" ]
-                link [ _rel  "stylesheet"
-                       _href "https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" ]
-
-            ]
-            body [] (navbar()@ [
-                div [_class "container"] content
-            ])
-        ]
-
-    let teacherView = ( [
-        
-        teacherTemplate()
-    ] |> layout)
-    
-    let headOfStudyView = ([
-        headOfStudyTemplate()
-    ] |> layout)
-
-    let index = [] |> layout
-
-// ---------------------------------
 // Web app
 // ---------------------------------
+
 
 let webApp =
     choose [
         GET >=>
             choose [
-                route "/" >=> htmlView Views.index
-                route "/teacher"  >=> htmlView Views.teacherView
-                route "/head" >=> htmlView Views.headOfStudyView
+                route "/" >=> index () 
+                route "/teacher"  >=> teacherView ()
+                route "/head" >=> headOfTeacherGetHandler
             ]
         POST >=> 
             choose [
