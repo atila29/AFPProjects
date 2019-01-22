@@ -9,14 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Npgsql" Version="3.2.5" /><!-- this will add the runtime coreapp version -->
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.*" />
     <PackageReference Include="Giraffe" Version="3.4.*" />
+    <PackageReference Include="SQLProvider" Version="1.1.58" />
     <PackageReference Include="TaskBuilder.fs" Version="2.1.*" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="model/inputModels.fs"/>
-    <Compile Include="handlers/handlers.fs"/>
+    <Compile Include="model/inputModels.fs" />
+    <Compile Include="handlers/handlers.fs" />
     <Compile Include="htmlViews.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
