@@ -1,4 +1,4 @@
-module Platform.Handlers
+﻿module Platform.Handlers
 
 open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks.V2.ContextInsensitive
@@ -116,6 +116,25 @@ let declineProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpConte
 let teacherView () = htmlView ( [
     teacherTemplate students
 ] |> layout)
+
+let studentGetHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -> task {
+
+        let publishedProjects = readAll
+                                |> List.ofSeq
+                                |> List.map (fun r -> {
+                                    ProjectData.id = r.id;
+                                    ProjectData.title = r.title;
+                                    ProjectData.description = r.description;
+                                    ProjectData.teacher = r.teacher;
+                                    ProjectData.courseno = r.courseno;
+                                    ProjectData.status = r.status;
+                                }) 
+                                |> List.filter (fun pd -> pd.status = ProjectStatus.Published)
+        return! ctx.WriteHtmlViewAsync ( [
+            (inspectPublishedProjectsView publishedProjects)
+          ] |> layout) 
+}
+
 
 let index () = htmlView ([] |> layout)
 

@@ -156,4 +156,25 @@ let headOfStudyView (requests: ProjectData list)(students: Student list) = div [
     ]
 ]
 
-
+let inspectPublishedProjectsView (publishedProjects: ProjectData list) = div[] [
+    table [_class "table"] [
+    thead [] [
+      tr [] [
+        th [ _scope "col"] [encodedText "id"]
+        th [ _scope "col"] [encodedText "title"]
+        th [ _scope "col"] [encodedText "description"]
+        th [ _scope "col"] [encodedText "teacher"]
+      ]
+    ]
+    tbody [] [
+      yield!
+        publishedProjects
+        |> List.map (fun p -> tr [] [
+          td [] [ encodedText (string p.id) ]
+          td [] [ encodedText (string p.title) ]
+          td [] [ encodedText (string p.description) ]
+          td [] [ encodedText (string p.teacher) ]
+        ])
+    ]
+  ]
+]

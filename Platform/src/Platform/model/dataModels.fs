@@ -7,6 +7,7 @@ type ProjectStatus =
   | Request=1
   | Accepted=2
   | Declined=3
+  | Published=4
 
 [<CLIMutable>]
 type ProjectData = {

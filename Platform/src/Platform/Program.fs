@@ -31,6 +31,7 @@ let webApp =
                 route "/" >=> index () 
                 route "/teacher"  >=> teacherView ()
                 route "/head" >=> headOfTeacherGetHandler
+                route "/student" >=> studentGetHandler
             ]
         POST >=> 
             choose [
