@@ -11,6 +11,7 @@ open Platform.HtmlViews
 open MongoDB.Bson
 open MongoDB.Driver
 open MongoDB.FSharp
+open MongoDB.Bson.Serialization.IdGenerators
 
 
 [<Literal>]
@@ -26,22 +27,18 @@ let create ( request : ProjectData ) =
 let readAll =
   projectsCollection.Find(Builders.Filter.Empty).ToEnumerable()
 
+let students = studentsCollection
+                    .Find(Builders.Filter.Empty)
+                    .ToEnumerable()
+                    |> List.ofSeq
+                    |> List.map (fun s -> s.id )
+
 let headOfTeacherGetHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -> task {
 
   let projects = readAll
                   |> List.ofSeq
-                  |> List.map (fun r -> {
-                    ProjectProposal.description= r.description;
-                    ProjectProposal.id= r.id;
-                    ProjectProposal.teacher= r.teacher;
-                    ProjectProposal.title= r.title;
-                  })
 
-  let students = studentsCollection
-                  .Find(Builders.Filter.Empty)
-                  .ToEnumerable()
-                  |> List.ofSeq
-                  |> List.map (fun s -> s.id )
+  
 
   return! ctx.WriteHtmlViewAsync ( [
     (headOfStudyView projects students)
@@ -68,20 +65,21 @@ let submitRequestHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext
 
             return!
                 (match result with
-                | Ok request -> create ({
-                                          id=None;
-                                          title = request.title;
-                                          description = request.description;
-                                          teacher = request.teacher
-                                        })
-                                          
-                                ctx.WriteJsonAsync result
-                | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
+                  | Ok request -> create ({
+                                            id=BsonObjectId(ObjectId.GenerateNewId());
+                                            title = request.title;
+                                            description = request.description;
+                                            teacher = request.teacher;
+                                            courseno = None;
+                                          })
+                                            
+                                  ctx.WriteJsonAsync result
+                  | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
                 )
         }
 
 let teacherView () = htmlView ( [
-    teacherTemplate()
+    teacherTemplate students
 ] |> layout)
 
 let index () = htmlView ([] |> layout)

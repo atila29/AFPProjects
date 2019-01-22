@@ -1,10 +1,10 @@
 module Platform.Model.Input
 
+open MongoDB.Bson
 
 
 [<CLIMutable>]
 type ProjectProposal = {
-  id: int option
   title: string
   description: string
   teacher: string

@@ -1,11 +1,14 @@
 module Platform.Model.Data
 
+open MongoDB.Bson
+
 [<CLIMutable>]
 type ProjectData = {
-  id: int option
+  id: BsonObjectId
   title: string
   description: string
   teacher: string
+  courseno: int option
 }
 
 [<CLIMutable>]

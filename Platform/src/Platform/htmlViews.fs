@@ -2,6 +2,7 @@ module Platform.HtmlViews
 
 open Giraffe.GiraffeViewEngine
 open Platform.Model.Input
+open Platform.Model.Data
 
 open Platform.Model.Domain
 
@@ -63,7 +64,7 @@ let layout (content: XmlNode list) =
 
 
 
-let teacherTemplate () = div[] [
+let teacherTemplate (students: Student list) = div[] [
   form [_action "/submitrequest"; _method "post"] [
                 p [] [ encodedText "title" ]
                 input [_type "text"; _name "title"] //type="text" name="lastname"
@@ -76,7 +77,7 @@ let teacherTemplate () = div[] [
   ]
   div [] [
       h1 [] [encodedText "students"]
-
+      studentTableTemplate students
   ]
 ]
 
@@ -85,7 +86,7 @@ let teacherTemplate () = div[] [
 
 
 
-let projectTableTemplate (requests: ProjectProposal list) = div[] [
+let projectTableTemplate (requests: ProjectData list) = div[] [
   table [_class "table"] [
     thead [] [
       tr [] [
@@ -125,7 +126,7 @@ let studentsTable (students: Student list) = div[] [
   ]
 ]
 
-let headOfStudyView (requests: ProjectProposal list)(students: Student list) = div [] [
+let headOfStudyView (requests: ProjectData list)(students: Student list) = div [] [
     projectTableTemplate requests
     h2 [] [encodedText "students"]
     studentsTable students
