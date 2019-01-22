@@ -9,3 +9,8 @@ type ProjectProposal = {
   description: string
   teacher: string
 }
+
+[<CLIMutable>]
+type StudentInput = {
+  id: string
+}

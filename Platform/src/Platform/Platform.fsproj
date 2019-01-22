@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="model/Types.fs" />
     <Compile Include="model/inputModels.fs" />
     <Compile Include="model/dataModels.fs" />
     <Compile Include="htmlViews.fs" />

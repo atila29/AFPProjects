@@ -35,6 +35,7 @@ let webApp =
         POST >=> 
             choose [
                 route "/submitrequest" >=> submitRequestHandler
+                route "/api/student" >=> addStudentHandler
             ]        
         setStatusCode 404 >=> text "Not Found" ]
 

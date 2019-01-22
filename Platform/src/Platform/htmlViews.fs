@@ -3,9 +3,28 @@ module Platform.HtmlViews
 open Giraffe.GiraffeViewEngine
 open Platform.Model.Input
 
+open Platform.Model.Domain
+
 // ---------------------------------
 // Views
 // ---------------------------------
+
+let studentTableTemplate (students: Student list) = div[] [
+  table [_class "table"] [
+    thead [] [
+      tr [] [
+        th [ _scope "col"] [encodedText "id"]
+      ]
+    ]
+    tbody [] [
+      yield!
+        students
+        |> List.map (fun req -> tr [] [
+          td [] [ encodedText (string req) ]
+        ])
+    ]
+  ]
+]
 
 let navbar () = ([
     ul [_class "nav nav-tabs bg-primary"] [
@@ -55,7 +74,16 @@ let teacherTemplate () = div[] [
                 br []
                 input [_type "submit"; _value "Request"]
   ]
+  div [] [
+      h1 [] [encodedText "students"]
+
+  ]
 ]
+
+
+
+
+
 
 let projectTableTemplate (requests: ProjectProposal list) = div[] [
   table [_class "table"] [
@@ -79,4 +107,34 @@ let projectTableTemplate (requests: ProjectProposal list) = div[] [
     ]
   ]
 ]
+
+let studentsTable (students: Student list) = div[] [
+  table [_class "table"] [
+    thead [] [
+      tr [] [
+        th [ _scope "col"] [encodedText "id"]
+      ]
+    ]
+    tbody [] [
+      yield!
+        students
+        |> List.map (fun s -> tr [] [
+          td [] [ encodedText s ]
+        ])
+    ]
+  ]
+]
+
+let headOfStudyView (requests: ProjectProposal list)(students: Student list) = div [] [
+    projectTableTemplate requests
+    h2 [] [encodedText "students"]
+    studentsTable students
+    form [_action "/api/student"; _method "post"] [
+                p [] [ encodedText "id" ]
+                input [_type "text"; _name "id"] 
+                br []
+                input [_type "submit"; _value "add Student"]
+  ]
+]
+
 

@@ -1,4 +1,4 @@
-﻿module Platform.Model
+﻿module Platform.Model.Domain
 
 type User =
     | Student of Student
