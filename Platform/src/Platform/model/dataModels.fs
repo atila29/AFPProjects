@@ -1,9 +1,6 @@
-module Platform.Model.Input
+module Platform.Model.Data
 
-
-
-[<CLIMutable>]
-type Request = {
+type RequestData = {
   id: int option
   title: string
   description: string
