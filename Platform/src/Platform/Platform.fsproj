@@ -1,13 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <DebugType>portable</DebugType>
     <AssemblyName>Platform</AssemblyName>
     <OutputType>Exe</OutputType>
-    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
-
+  <ItemGroup>
+    <Compile Include="model/Types.fs" />
+    <Compile Include="model/inputModels.fs" />
+    <Compile Include="model/dataModels.fs" />
+    <Compile Include="htmlViews.fs" />
+    <Compile Include="handlers.fs" />
+    <None Include="web.config" />
+    <Compile Include="Program.fs" />
+    <Content Include="WebRoot/**/*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.*" />
     <PackageReference Include="Giraffe" Version="3.4.*" />
@@ -16,22 +24,4 @@
     <PackageReference Include="MongoDb.FSharp" Version="0.1.0" />
     <PackageReference Include="TaskBuilder.fs" Version="2.1.*" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="model/Types.fs" />
-    <Compile Include="model/inputModels.fs" />
-    <Compile Include="model/dataModels.fs" />
-    <Compile Include="htmlViews.fs" />
-    <Compile Include="handlers.fs" />
-    <Compile Include="Program.fs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="web.config" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="WebRoot\**\*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-
 </Project>

@@ -1,6 +1,12 @@
 module Platform.Model.Data
 
 open MongoDB.Bson
+open MongoDB.Bson
+
+type ProjectStatus = 
+  | Request=1
+  | Accepted=2
+  | Declined=3
 
 [<CLIMutable>]
 type ProjectData = {
@@ -8,7 +14,8 @@ type ProjectData = {
   title: string
   description: string
   teacher: string
-  courseno: int option
+  courseno: int
+  status: ProjectStatus
 }
 
 [<CLIMutable>]

@@ -12,6 +12,8 @@ open MongoDB.Bson
 open MongoDB.Driver
 open MongoDB.FSharp
 open MongoDB.Bson.Serialization.IdGenerators
+open MongoDB.Bson
+open MongoDB.Bson
 
 
 [<Literal>]
@@ -70,13 +72,46 @@ let submitRequestHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext
                                             title = request.title;
                                             description = request.description;
                                             teacher = request.teacher;
-                                            courseno = None;
+                                            courseno = 0;
+                                            status = ProjectStatus.Request
                                           })
                                             
                                   ctx.WriteJsonAsync result
                   | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
                 )
         }
+
+let acceptProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
+  task {
+            // Binds a form payload to a Car object
+            let! result = ctx.TryBindFormAsync<AnswerProposalInput>()
+
+            return!
+                (match result with
+                  | Ok project -> let filter = Builders<ProjectData>.Filter.Eq((fun x -> x.id), BsonObjectId(ObjectId(project.id)))
+                                  let update = Builders<ProjectData>.Update.Set((fun x -> x.courseno), project.courseNo.Value).Set((fun x -> x.status), ProjectStatus.Accepted)
+                                  ignore(projectsCollection.UpdateOne(filter, update))
+                                  ctx.WriteJsonAsync project
+                  | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
+                )
+        }
+
+let declineProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
+  task {
+            // Binds a form payload to a Car object
+            let! result = ctx.TryBindFormAsync<AnswerProposalInput>()
+
+            return!
+                (match result with
+                  | Ok project -> let filter = Builders<ProjectData>.Filter.Eq((fun x -> x.id), BsonObjectId(ObjectId(project.id)))
+                                  let update = Builders<ProjectData>.Update.Set((fun x -> x.status), ProjectStatus.Declined)
+                                  ignore(projectsCollection.UpdateOne(filter, update))
+                                  ctx.WriteJsonAsync project
+                  | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
+                )
+        }
+
+        
 
 let teacherView () = htmlView ( [
     teacherTemplate students

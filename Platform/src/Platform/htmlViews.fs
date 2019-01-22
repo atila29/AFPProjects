@@ -127,6 +127,7 @@ let studentsTable (students: Student list) = div[] [
 ]
 
 let headOfStudyView (requests: ProjectData list)(students: Student list) = div [] [
+    h2 [] [encodedText "projects"]
     projectTableTemplate requests
     h2 [] [encodedText "students"]
     studentsTable students
@@ -135,7 +136,24 @@ let headOfStudyView (requests: ProjectData list)(students: Student list) = div [
                 input [_type "text"; _name "id"] 
                 br []
                 input [_type "submit"; _value "add Student"]
-  ]
+    ]
+
+    h2 [] [encodedText "accept project"]
+    form [_action "/api/project/accept"; _method "post"] [
+                p [] [ encodedText "id" ]
+                input [_type "text"; _name "id"]
+                br []
+                p [] [ encodedText "course#" ]
+                input [_type "text"; _name "courseno"]
+                input [_type "submit"; _value "Accept"]
+    ]
+
+    h2 [] [encodedText "decline project"]
+    form [_action "/api/project/decline"; _method "post"] [
+                p [] [ encodedText "id" ]
+                input [_type "text"; _name "id"] 
+                input [_type "submit"; _value "Decline"]
+    ]
 ]
 
 

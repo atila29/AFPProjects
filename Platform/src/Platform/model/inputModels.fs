@@ -14,3 +14,9 @@ type ProjectProposal = {
 type StudentInput = {
   id: string
 }
+
+[<CLIMutable>]
+type AnswerProposalInput = {
+  id: string
+  courseNo: int option
+}
