@@ -9,7 +9,6 @@ open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
 open Platform.Handlers
-open Platform.HtmlViews
 
 // ---------------------------------
 // Models
@@ -21,94 +20,24 @@ type Message =
     }
 
 // ---------------------------------
-// Views
-// ---------------------------------
-
-module Views =
-    open GiraffeViewEngine
-
-    let layout (content: XmlNode list) =
-        html [] [
-            head [] [
-                title []  [ encodedText "Platform" ]
-                link [ _rel  "stylesheet"
-                       _type "text/css"
-                       _href "/main.css" ]
-                link [ _rel  "stylesheet"
-                       _href "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" ]
-                link [ _rel  "stylesheet"
-                       _href "https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" ]
-                       //<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
-                        //<link rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
-
-
-            ]
-            body [] content
-        ]
-
-    let navbar () = ([
-        ul [_class "nav nav-tabs bg-primary"] [
-            li [_class "nav-item"] [
-                a [ _class "nav-link active"; _href "/" ] [ str "index"]
-            ]
-            li [_class "nav-item"] [
-                a [ _class "nav-link active"; _href "/student" ] [ str "student" ]
-            ]
-            li [_class "nav-item"] [
-                a [ _class "nav-link active"; _href "/teacher" ] [ str "teacher" ]
-            ]
-            li [_class "nav-item"] [
-                a [ _class "nav-link active"; _href "/head" ] [ str "head of study" ]
-            ]
-        ]
-    ] |> layout)
-//     <!-- primary -->
-// <ul class="nav nav-tabs bg-primary">
-//   <li class="nav-item">
-//     <a class="nav-link active" href="#">Active</a>
-//   </li>
-//   <li class="nav-item">
-//     <a class="nav-link" href="#">Link</a>
-//   </li>
-//   <li class="nav-item">
-//     <a class="nav-link" href="#">Another link</a>
-//   </li>
-//   <li class="nav-item">
-//     <a class="nav-link disabled" href="#">Disabled</a>
-//   </li>
-// </ul>
-
-    let partial () = [
-        navbar()
-        h1 [] [ encodedText "Platform" ]
-    ] 
-
-    let teacherView = ( partial() @ [
-        
-        teacherTemplate()
-    ] |> layout)
-    
-    let headOfStudyView = ( partial() @ [
-        headOfStudyTemplate()
-    ] |> layout)
-
-    let index = partial() |> layout
-
-// ---------------------------------
 // Web app
 // ---------------------------------
+
 
 let webApp =
     choose [
         GET >=>
             choose [
-                route "/" >=> htmlView Views.index
-                route "/teacher"  >=> htmlView Views.teacherView
-                route "/head" >=> htmlView Views.headOfStudyView
+                route "/" >=> index () 
+                route "/teacher"  >=> teacherView ()
+                route "/head" >=> headOfTeacherGetHandler
             ]
         POST >=> 
             choose [
                 route "/submitrequest" >=> submitRequestHandler
+                route "/api/student" >=> addStudentHandler
+                route "/api/project/accept" >=> acceptProjectProposal
+                route "/api/project/decline" >=> declineProjectProposal
             ]        
         setStatusCode 404 >=> text "Not Found" ]
 
