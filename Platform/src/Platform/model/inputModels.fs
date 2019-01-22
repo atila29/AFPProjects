@@ -3,7 +3,7 @@ module Platform.Model.Input
 
 
 [<CLIMutable>]
-type Request = {
+type ProjectProposal = {
   id: int option
   title: string
   description: string

@@ -1,7 +1,7 @@
 module Platform.Model.Data
 
 [<CLIMutable>]
-type RequestData = {
+type Project = {
   id: int option
   title: string
   description: string

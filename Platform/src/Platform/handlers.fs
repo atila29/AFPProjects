@@ -17,30 +17,29 @@ open Platform.Model
 let DbName = "platformdb"
 let client = MongoClient()
 let db = client.GetDatabase(DbName)
-let requestCollection = db.GetCollection<RequestData>("request") // maybe projects?
+let projectsCollection = db.GetCollection<Project>("projects") // maybe projects?
 
 
-let create ( request : RequestData ) = 
-  requestCollection.InsertOne( request )
+let create ( request : Project ) = 
+  projectsCollection.InsertOne( request )
 let readAll =
-  requestCollection.Find(Builders.Filter.Empty).ToEnumerable()
+  projectsCollection.Find(Builders.Filter.Empty).ToEnumerable()
 
 let headOfTeacherGetHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -> task {
-
 
   let x = readAll
           |> List.ofSeq
           |> List.map (fun r -> {
-            Request.description= r.description;
-            Request.id= r.id;
-            Request.teacher= r.teacher;
-            Request.title= r.title;
+            ProjectProposal.description= r.description;
+            ProjectProposal.id= r.id;
+            ProjectProposal.teacher= r.teacher;
+            ProjectProposal.title= r.title;
           })
 
   // (headOfStudyTemplate ( |> List.map (fun r -> r)))
 
   return! ctx.WriteHtmlViewAsync ( [
-    (headOfStudyTemplate x)
+    (projectTableTemplate x)
     ] |> layout) 
 }
 
@@ -49,7 +48,7 @@ let headOfTeacherGetHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpCont
 let submitRequestHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
   task {
             // Binds a form payload to a Car object
-            let! result = ctx.TryBindFormAsync<Request>()
+            let! result = ctx.TryBindFormAsync<ProjectProposal>()
 
             return!
                 (match result with
@@ -71,10 +70,4 @@ let teacherView () = htmlView ( [
 
 let index () = htmlView ([] |> layout)
 
-
-// let headOfStudyView = 
-// ([
-//     let x =headOfTeacherGetHandler()
-    
-// ] |> layout)
 

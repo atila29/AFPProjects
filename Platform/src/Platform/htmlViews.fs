@@ -57,7 +57,7 @@ let teacherTemplate () = div[] [
   ]
 ]
 
-let headOfStudyTemplate (requests: Request list) = div[] [
+let projectTableTemplate (requests: ProjectProposal list) = div[] [
   table [_class "table"] [
     thead [] [
       tr [] [
