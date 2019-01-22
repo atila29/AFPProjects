@@ -16,11 +16,11 @@ open Platform.Model
 let DbName = "platformdb"
 let client         = MongoClient()
 let db             = client.GetDatabase(DbName)
-let groupCollection = db.GetCollection<RequestData>("groups")
+let requestCollection = db.GetCollection<RequestData>("request") // maybe projects?
 
 
 let create ( request : RequestData ) = 
-  groupCollection.InsertOne( request )
+  requestCollection.InsertOne( request )
 
 
 
@@ -28,8 +28,6 @@ let submitRequestHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext
   task {
             // Binds a form payload to a Car object
             let! result = ctx.TryBindFormAsync<Request>()
-
-
 
             return!
                 (match result with
