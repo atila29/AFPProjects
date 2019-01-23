@@ -22,7 +22,7 @@ let client = MongoClient()
 let db = client.GetDatabase(DbName)
 let projectsCollection = db.GetCollection<ProjectData>("projects") // maybe projects?
 let studentsCollection = db.GetCollection<StudentData>("students")
-
+let groupsCollection = db.GetCollection<GroupData>("groups");
 
 let create ( request : ProjectData ) = 
   projectsCollection.InsertOne( request )
@@ -40,16 +40,45 @@ let headOfTeacherGetHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpCont
   let projects = readAll
                   |> List.ofSeq
 
-  
-
   return! ctx.WriteHtmlViewAsync ( [
     (headOfStudyView projects students)
     ] |> layout) 
 }
 
+let createGroupHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
+  task {
+          let! result = ctx.TryBindFormAsync<GroupInput>()
+
+          return!
+              (match result with
+              | Ok group -> ignore(groupsCollection.InsertOneAsync({
+                                    id=ObjectId.GenerateNewId();
+                                    name=group.name;
+                                    students=List.Empty;
+                                  }))
+                            ctx.WriteJsonAsync group
+              | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
+              )
+        }
+
+let addStudentToGroupHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
+  task {
+          let! result = ctx.TryBindFormAsync<StudentGroupInput>()
+
+          return!
+              (match result with
+              | Ok input -> let student = studentsCollection.Find(Builders<StudentData>.Filter.Eq((fun x -> x.id), input.studentId)).First()
+                            let groupfilter = Builders<GroupData>.Filter.Eq((fun x -> x.id), ObjectId(input.id))
+                            let update = Builders<GroupData>.Update.AddToSet((fun x -> x.students), student)
+                            
+                            ignore(groupsCollection.UpdateOne(groupfilter, update))
+                            ctx.WriteJsonAsync input
+              | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
+              )
+        }      
+
 let addStudentHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
   task {
-            // Binds a form payload to a Car object
             let! result = ctx.TryBindFormAsync<StudentInput>()
 
             return!
@@ -62,13 +91,12 @@ let addStudentHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -
 
 let submitRequestHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
   task {
-            // Binds a form payload to a Car object
             let! result = ctx.TryBindFormAsync<ProjectProposal>()
 
             return!
                 (match result with
                   | Ok request -> create ({
-                                            id=BsonObjectId(ObjectId.GenerateNewId());
+                                            id=ObjectId.GenerateNewId();
                                             title = request.title;
                                             description = request.description;
                                             teacher = request.teacher;
@@ -83,12 +111,11 @@ let submitRequestHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext
 
 let acceptProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
   task {
-            // Binds a form payload to a Car object
             let! result = ctx.TryBindFormAsync<AnswerProposalInput>()
 
             return!
                 (match result with
-                  | Ok project -> let filter = Builders<ProjectData>.Filter.Eq((fun x -> x.id), BsonObjectId(ObjectId(project.id)))
+                  | Ok project -> let filter = Builders<ProjectData>.Filter.Eq((fun x -> x.id), ObjectId(project.id))
                                   let update = Builders<ProjectData>.Update.Set((fun x -> x.courseno), project.courseNo.Value).Set((fun x -> x.status), ProjectStatus.Accepted)
                                   ignore(projectsCollection.UpdateOne(filter, update))
                                   ctx.WriteJsonAsync project
@@ -98,12 +125,11 @@ let acceptProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpContex
 
 let declineProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
   task {
-            // Binds a form payload to a Car object
             let! result = ctx.TryBindFormAsync<AnswerProposalInput>()
 
             return!
                 (match result with
-                  | Ok project -> let filter = Builders<ProjectData>.Filter.Eq((fun x -> x.id), BsonObjectId(ObjectId(project.id)))
+                  | Ok project -> let filter = Builders<ProjectData>.Filter.Eq((fun x -> x.id), ObjectId(project.id))
                                   let update = Builders<ProjectData>.Update.Set((fun x -> x.status), ProjectStatus.Declined)
                                   ignore(projectsCollection.UpdateOne(filter, update))
                                   ctx.WriteJsonAsync project

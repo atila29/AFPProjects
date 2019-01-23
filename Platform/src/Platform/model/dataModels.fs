@@ -2,6 +2,7 @@ module Platform.Model.Data
 
 open MongoDB.Bson
 open MongoDB.Bson
+open Newtonsoft.Json.Bson
 
 type ProjectStatus = 
   | Request=1
@@ -10,7 +11,7 @@ type ProjectStatus =
 
 [<CLIMutable>]
 type ProjectData = {
-  id: BsonObjectId
+  id: ObjectId
   title: string
   description: string
   teacher: string
@@ -21,4 +22,11 @@ type ProjectData = {
 [<CLIMutable>]
 type StudentData = {
   id: string
+}
+
+[<CLIMutable>]
+type GroupData = {
+  id: ObjectId
+  name: string
+  students: StudentData seq
 }

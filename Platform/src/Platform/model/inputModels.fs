@@ -20,3 +20,14 @@ type AnswerProposalInput = {
   id: string
   courseNo: int option
 }
+
+[<CLIMutable>]
+type GroupInput = {
+  name: string
+}
+
+[<CLIMutable>]
+type StudentGroupInput = {
+  id: string
+  studentId: string
+}
