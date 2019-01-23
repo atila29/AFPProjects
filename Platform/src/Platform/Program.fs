@@ -39,6 +39,7 @@ let webApp =
                 route "/api/student" >=> addStudentHandler
                 route "/api/project/accept" >=> acceptProjectProposal
                 route "/api/project/decline" >=> declineProjectProposal
+                route "/api/project/publish" >=> publishProjectProposal
             ]        
         setStatusCode 404 >=> text "Not Found" ]
 

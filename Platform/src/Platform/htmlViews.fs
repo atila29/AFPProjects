@@ -4,8 +4,6 @@ open Giraffe.GiraffeViewEngine
 open Platform.Model.Input
 open Platform.Model.Data
 
-open Platform.Model.Domain
-
 // ---------------------------------
 // Views
 // ---------------------------------
@@ -14,14 +12,16 @@ let studentTableTemplate (students: Student list) = div[] [
   table [_class "table"] [
     thead [] [
       tr [] [
-        th [ _scope "col"] [encodedText "id"]
+        th [ _scope "col"] [encodedText "studynr."]
+        th [ _scope "col"] [encodedText "name"]
       ]
     ]
     tbody [] [
       yield!
         students
         |> List.map (fun req -> tr [] [
-          td [] [ encodedText (string req) ]
+          td [] [ encodedText (string req.studynumber) ]
+          td [] [ encodedText (string req.name) ]
         ])
     ]
   ]
@@ -66,12 +66,18 @@ let layout (content: XmlNode list) =
 
 let teacherTemplate (students: Student list) = div[] [
   form [_action "/submitrequest"; _method "post"] [
-                p [] [ encodedText "title" ]
+                p [] [ encodedText "Title" ]
                 input [_type "text"; _name "title"] //type="text" name="lastname"
-                p [] [ encodedText "description" ]
+                p [] [ encodedText "Description" ]
                 input [_type "text"; _name "description"]
-                p [] [ encodedText "teacher" ]
-                input [_type "text"; _name "teacher"]
+                p [] [ encodedText "Teacher email" ]
+                input [_type "text"; _name "teacherEmail"]
+                p [] [ encodedText "Prerequisites (comma-separated)" ]
+                input [_type "text"; _name "prerequisitesCS"]
+                p [] [ encodedText "Cosupervisor emails (comma-separated)" ]
+                input [_type "text"; _name "cosupervisorsEmailCS"]
+                p [] [ encodedText "Restrictions (command-separated)" ]
+                input [_type "text"; _name "restrictionsCS"]
                 br []
                 input [_type "submit"; _value "Request"]
   ]
@@ -86,7 +92,7 @@ let teacherTemplate (students: Student list) = div[] [
 
 
 
-let projectTableTemplate (requests: ProjectData list) = div[] [
+let projectTableTemplate (requests: Project list) = div[] [
   table [_class "table"] [
     thead [] [
       tr [] [
@@ -94,6 +100,11 @@ let projectTableTemplate (requests: ProjectData list) = div[] [
         th [ _scope "col"] [encodedText "title"]
         th [ _scope "col"] [encodedText "description"]
         th [ _scope "col"] [encodedText "teacher"]
+        th [ _scope "col"] [encodedText "courseno"]
+        th [ _scope "col"] [encodedText "status"]
+        th [ _scope "col"] [encodedText "restrictions"]
+        th [ _scope "col"] [encodedText "prerequisites"]
+        th [ _scope "col"] [encodedText "cosupervisors"]
       ]
     ]
     tbody [] [
@@ -104,6 +115,17 @@ let projectTableTemplate (requests: ProjectData list) = div[] [
           td [] [ encodedText (string req.title) ]
           td [] [ encodedText (string req.description) ]
           td [] [ encodedText (string req.teacher) ]
+          td [] [ encodedText (string req.courseno) ]
+          td [] [ encodedText (string (match req.status with
+                                       | ProjectStatus.Request -> "requested"
+                                       | ProjectStatus.Accepted -> "accepted" 
+                                       | ProjectStatus.Declined -> "declined"
+                                       | ProjectStatus.Published -> "published"
+                                       | _ -> ""
+                                       ))]
+          td [] [ encodedText (req.restrictions |> List.map (fun r -> string r.name) |> String.concat "<br/>") ]
+          td [] [ encodedText (req.prerequisites |> String.concat "<br/>") ]
+          td [] [ encodedText (req.cosupervisors |> List.map (fun c -> c.name) |> String.concat "<br/>") ]
         ])
     ]
   ]
@@ -113,20 +135,22 @@ let studentsTable (students: Student list) = div[] [
   table [_class "table"] [
     thead [] [
       tr [] [
-        th [ _scope "col"] [encodedText "id"]
+        th [ _scope "col"] [encodedText "studynr."]
+        th [ _scope "col"] [encodedText "name"]
       ]
     ]
     tbody [] [
       yield!
         students
         |> List.map (fun s -> tr [] [
-          td [] [ encodedText s ]
+          td [] [ encodedText s.studynumber ]
+          td [] [ encodedText s.name ]
         ])
     ]
   ]
 ]
 
-let headOfStudyView (requests: ProjectData list)(students: Student list) = div [] [
+let headOfStudyView (requests: Project list)(students: Student list) = div [] [
     h2 [] [encodedText "projects"]
     projectTableTemplate requests
     h2 [] [encodedText "students"]
@@ -154,27 +178,20 @@ let headOfStudyView (requests: ProjectData list)(students: Student list) = div [
                 input [_type "text"; _name "id"] 
                 input [_type "submit"; _value "Decline"]
     ]
+
+    h2 [] [encodedText "Publish Project"]
+    form [_action "/api/project/publish"; _method "post"] [
+                p [] [encodedText "id"]
+                input [_type "text"; _name "id"]
+                input [_type "submit"; _value "Publish"]
+    ]
+    
+    
 ]
 
-let inspectPublishedProjectsView (publishedProjects: ProjectData list) = div[] [
-    table [_class "table"] [
-    thead [] [
-      tr [] [
-        th [ _scope "col"] [encodedText "id"]
-        th [ _scope "col"] [encodedText "title"]
-        th [ _scope "col"] [encodedText "description"]
-        th [ _scope "col"] [encodedText "teacher"]
-      ]
-    ]
-    tbody [] [
-      yield!
-        publishedProjects
-        |> List.map (fun p -> tr [] [
-          td [] [ encodedText (string p.id) ]
-          td [] [ encodedText (string p.title) ]
-          td [] [ encodedText (string p.description) ]
-          td [] [ encodedText (string p.teacher) ]
-        ])
-    ]
+let inspectPublishedProjectsView (publishedProjects: Project list) = div[] [
+    div [] [
+      h1 [] [encodedText "Bachelor Projects"]
+      projectTableTemplate publishedProjects
   ]
 ]

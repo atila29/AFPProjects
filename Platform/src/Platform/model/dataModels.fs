@@ -1,7 +1,6 @@
 module Platform.Model.Data
 
 open MongoDB.Bson
-open MongoDB.Bson
 
 type ProjectStatus = 
   | Request=1
@@ -10,16 +9,40 @@ type ProjectStatus =
   | Published=4
 
 [<CLIMutable>]
-type ProjectData = {
-  id: BsonObjectId
-  title: string
-  description: string
-  teacher: string
-  courseno: int
-  status: ProjectStatus
+type Teacher = {
+    name: string
+    email: string
 }
 
 [<CLIMutable>]
-type StudentData = {
-  id: string
+type Student = {
+    name: string
+    studynumber: string
+}
+
+[<CLIMutable>]
+type HeadOfStudy = {
+    name: string
+    department: string
+    email: string
+}
+
+[<CLIMutable>]
+type Restriction = {
+  name: string
+  n: int option
+}
+
+
+[<CLIMutable>]
+type Project = {
+  id: BsonObjectId
+  title: string
+  description: string
+  teacher: Teacher
+  courseno: int
+  status: ProjectStatus
+  restrictions: Restriction list
+  prerequisites: string list
+  cosupervisors: Teacher list
 }
