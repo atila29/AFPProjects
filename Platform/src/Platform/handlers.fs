@@ -37,10 +37,8 @@ let students = studentsCollection
                     |> List.map (fun s -> s.id )
 
 let groups = groupsCollection
-              .Find(Builders.Filter.Empty)
-              .ToEnumerable()
-              |> Seq.map (fun g -> (g.number, (g.students |> Seq.map (fun s -> s.id) |> List.ofSeq)))
-              |> List.ofSeq
+                  .Find(Builders.Filter.Empty)
+                  .ToEnumerable()
 
 let headOfTeacherGetHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -> task {
 
@@ -48,7 +46,7 @@ let headOfTeacherGetHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpCont
                   |> List.ofSeq
 
   return! ctx.WriteHtmlViewAsync ( [
-    (headOfStudyView projects students)
+    headOfStudyView projects students
     ] |> layout) 
 }
 
@@ -75,7 +73,7 @@ let addStudentToGroupHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpCon
           return!
               (match result with
               | Ok input -> let student = studentsCollection.Find(Builders<StudentData>.Filter.Eq((fun x -> x.id), input.studentId)).First()
-                            let groupfilter = Builders<GroupData>.Filter.Eq((fun x -> x.id), ObjectId(input.id))
+                            let groupfilter = Builders<GroupData>.Filter.Eq((fun x -> x.number), input.groupNumber)
                             let update = Builders<GroupData>.Update.AddToSet((fun x -> x.students), student)
                             
                             ignore(groupsCollection.UpdateOne(groupfilter, update))
@@ -144,11 +142,18 @@ let declineProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpConte
                 )
         }
 
-        
+let teacherView: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -> task {
+  return! ctx.WriteHtmlViewAsync ( [
+    teacherTemplate students (groups|> List.ofSeq
+                                    |> List.map (fun g -> (g.number, (g.students |> List.ofSeq |> Seq.map (fun s -> s.id) |> List.ofSeq))))
+    ] |> layout) 
+}
 
-let teacherView () = htmlView ( [
-    teacherTemplate students groups
-] |> layout)
+
+// let teacherView () =
+//   htmlView ( [
+//       teacherTemplate students groups 
+//   ] |> layout)
 
 let index () = htmlView ([] |> layout)
 

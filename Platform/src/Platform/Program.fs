@@ -29,7 +29,7 @@ let webApp =
         GET >=>
             choose [
                 route "/" >=> index () 
-                route "/teacher"  >=> teacherView ()
+                route "/teacher"  >=> teacherView
                 route "/head" >=> headOfTeacherGetHandler
             ]
         POST >=> 

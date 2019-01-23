@@ -28,6 +28,6 @@ type GroupInput = {
 
 [<CLIMutable>]
 type StudentGroupInput = {
-  id: string
+  groupNumber: int
   studentId: string
 }

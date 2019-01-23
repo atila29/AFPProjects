@@ -102,6 +102,23 @@ let teacherTemplate (students: Student list) (groups: Group list) = div[] [
   div [] [
       h1 [] [encodedText "groups"]
       groupTable groups
+      div [] [
+        h2 [] [encodedText "Create group"]
+        form [_action "/api/group/create"; _method "post"] [
+                p [] [ encodedText "number" ]
+                input [_type "number"; _name "number"]
+                input [_type "submit"; _value "create group"]
+        ]
+        h2 [] [encodedText "Add member group"]
+        form [_action "/api/group/add"; _method "post"] [
+                p [] [ encodedText "group number" ]
+                input [_type "number"; _name "groupNumber"] 
+                p [] [ encodedText "studentId" ]
+                input [_type "text"; _name "studentId"] 
+                br []
+                input [_type "submit"; _value "add member"]
+        ]
+      ]
   ]
 ]
 
