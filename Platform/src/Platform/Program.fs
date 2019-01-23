@@ -31,6 +31,7 @@ let webApp =
                 route "/" >=> index () 
                 route "/teacher"  >=> teacherView
                 route "/head" >=> headOfTeacherGetHandler
+                route "/student" >=> studentGetHandler
             ]
         POST >=> 
             choose [
@@ -40,6 +41,7 @@ let webApp =
                 route "/api/project/decline" >=> declineProjectProposal
                 route "/api/group/create" >=> createGroupHandler
                 route "/api/group/add" >=> addStudentToGroupHandler
+                route "/api/project/publish" >=> publishProjectProposal
             ]        
         setStatusCode 404 >=> text "Not Found" ]
 
