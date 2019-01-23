@@ -64,7 +64,27 @@ let layout (content: XmlNode list) =
 
 
 
-let teacherTemplate (students: Student list) = div[] [
+let groupTable (groups: Group list) = div[] [
+  table [_class "table"] [
+    thead [] [
+      tr [] [
+        th [ _scope "col"] [encodedText "id"]
+        th [ _scope "col"] [encodedText "students"]
+      ]
+    ]
+    tbody [] [
+      yield!
+        groups
+        |> List.map (fun grp -> match grp with
+                                | (n, ss) ->  tr [] [
+                                                td [] [ encodedText (string n) ]
+                                                td [] [ encodedText (String.concat ", " ss) ]
+                                              ])
+    ]
+  ]
+]
+
+let teacherTemplate (students: Student list) (groups: Group list) = div[] [
   form [_action "/submitrequest"; _method "post"] [
                 p [] [ encodedText "title" ]
                 input [_type "text"; _name "title"] //type="text" name="lastname"
@@ -78,6 +98,10 @@ let teacherTemplate (students: Student list) = div[] [
   div [] [
       h1 [] [encodedText "students"]
       studentTableTemplate students
+  ]
+  div [] [
+      h1 [] [encodedText "groups"]
+      groupTable groups
   ]
 ]
 

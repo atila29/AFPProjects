@@ -14,6 +14,7 @@ open MongoDB.FSharp
 open MongoDB.Bson.Serialization.IdGenerators
 open MongoDB.Bson
 open MongoDB.Bson
+open System.Text.RegularExpressions
 
 
 [<Literal>]
@@ -35,6 +36,12 @@ let students = studentsCollection
                     |> List.ofSeq
                     |> List.map (fun s -> s.id )
 
+let groups = groupsCollection
+              .Find(Builders.Filter.Empty)
+              .ToEnumerable()
+              |> Seq.map (fun g -> (g.number, (g.students |> Seq.map (fun s -> s.id) |> List.ofSeq)))
+              |> List.ofSeq
+
 let headOfTeacherGetHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -> task {
 
   let projects = readAll
@@ -53,7 +60,7 @@ let createGroupHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) 
               (match result with
               | Ok group -> ignore(groupsCollection.InsertOneAsync({
                                     id=ObjectId.GenerateNewId();
-                                    name=group.name;
+                                    number=group.number;
                                     students=List.Empty;
                                   }))
                             ctx.WriteJsonAsync group
@@ -140,7 +147,7 @@ let declineProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpConte
         
 
 let teacherView () = htmlView ( [
-    teacherTemplate students
+    teacherTemplate students groups
 ] |> layout)
 
 let index () = htmlView ([] |> layout)

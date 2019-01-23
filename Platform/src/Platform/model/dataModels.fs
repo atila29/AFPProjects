@@ -27,6 +27,6 @@ type StudentData = {
 [<CLIMutable>]
 type GroupData = {
   id: ObjectId
-  name: string
+  number: int
   students: StudentData seq
 }

@@ -23,7 +23,7 @@ type AnswerProposalInput = {
 
 [<CLIMutable>]
 type GroupInput = {
-  name: string
+  number: int
 }
 
 [<CLIMutable>]
