@@ -9,6 +9,7 @@ open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
 open Platform.Handlers
+open Platform.DBSeed
 
 // ---------------------------------
 // Models
@@ -81,6 +82,7 @@ let configureLogging (builder : ILoggingBuilder) =
 
 [<EntryPoint>]
 let main _ =
+    seedDB |> ignore
     let contentRoot = Directory.GetCurrentDirectory()
     let webRoot     = Path.Combine(contentRoot, "WebRoot")
     WebHostBuilder()
