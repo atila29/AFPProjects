@@ -15,10 +15,6 @@ open Platform.DBSeed
 // Models
 // ---------------------------------
 
-type Message =
-    {
-        Text : string
-    }
 
 // ---------------------------------
 // Web app
@@ -36,14 +32,14 @@ let webApp =
             ]
         POST >=> 
             choose [
-                route "/submitrequest" >=> submitRequestHandler
-                route "/api/student" >=> addStudentHandler
-                route "/api/project/accept" >=> acceptProjectProposal
-                route "/api/project/decline" >=> declineProjectProposal
-                route "/api/group/create" >=> createGroupHandler
-                route "/api/group/add" >=> addStudentToGroupHandler
-                route "/api/project/publish" >=> publishProjectProposal
-                route "/api/project/assign" >=> assignProjectToGroupHandler
+                route "/submitrequest" >=> submitRequestHandler >=> redirectTo true "/teacher"
+                route "/api/student" >=> addStudentHandler >=> redirectTo true "/head"
+                route "/api/project/accept" >=> acceptProjectProposal >=> redirectTo true "/head"
+                route "/api/project/decline" >=> declineProjectProposal >=> redirectTo true "/head"
+                route "/api/group/create" >=> createGroupHandler >=> redirectTo true "/teacher"
+                route "/api/group/add" >=> addStudentToGroupHandler >=> redirectTo true "/teacher"
+                route "/api/project/publish" >=> publishProjectProposal >=> redirectTo true "/head"
+                route "/api/project/assign" >=> assignProjectToGroupHandler >=> redirectTo true "/teacher"
             ]        
         setStatusCode 404 >=> text "Not Found" ]
 
