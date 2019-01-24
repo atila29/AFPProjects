@@ -8,6 +8,7 @@
     <Compile Include="model/dataModels.fs" />
     <Compile Include="model/inputModels.fs" />
     <Compile Include="model/Types.fs" />
+    <Compile Include="DBSeed.fs" />
     <Compile Include="htmlViews.fs" />
     <Compile Include="handlers.fs" />
     <None Include="web.config" />
