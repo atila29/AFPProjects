@@ -14,3 +14,5 @@ Run the `build.bat` script in order to restore, build and test (if you've select
 ```
 > ./build.bat
 ```
+
+Then navigate to localhost:8765 in a browser
