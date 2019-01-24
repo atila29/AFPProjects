@@ -72,7 +72,8 @@ let createGroupHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) 
                                     students=List.Empty;
                                     projectId=ObjectId.Empty
                                   }))
-                            ctx.WriteJsonAsync group
+                            next ctx
+                            //ctx.WriteJsonAsync group
               | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
               )
         }
@@ -87,7 +88,7 @@ let addStudentToGroupHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpCon
                             let groupfilter = Builders<Group>.Filter.Eq((fun x -> x.number), input.groupNumber)
                             let update = Builders<Group>.Update.AddToSet((fun x -> x.students), student)
                             ignore(groupsCollection.UpdateOne(groupfilter, update))
-                            ctx.WriteJsonAsync input
+                            next ctx
               | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
               )
         }      
@@ -106,7 +107,7 @@ let addStudentHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -
                                         Student.name=student.name;
                                         Student.studynumber=student.studynumber;
                                       }))
-                                     ctx.WriteJsonAsync student
+                                     next ctx
                 | Error err ->  (RequestErrors.BAD_REQUEST err) next ctx
                 )
         }
@@ -143,7 +144,7 @@ let submitRequestHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext
                                                prerequisites = prerequisites;
                                                cosupervisors = cosupervisors;
                                       })    
-                                      ctx.WriteJsonAsync result
+                                      next ctx
                                   with
                                   | Failure f -> (RequestErrors.BAD_REQUEST f) next ctx
                   | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
@@ -159,7 +160,7 @@ let acceptProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpContex
                   | Ok project -> let filter = Builders<Project>.Filter.Eq((fun x -> x.id), ObjectId(project.id))
                                   let update = Builders<Project>.Update.Set((fun x -> x.courseno), project.courseNo.Value).Set((fun x -> x.status), ProjectStatus.Accepted)
                                   ignore(projectsCollection.UpdateOne(filter, update))
-                                  ctx.WriteJsonAsync project
+                                  next ctx
                   | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
                 )
         }
@@ -173,7 +174,7 @@ let declineProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpConte
                   | Ok project -> let filter = Builders<Project>.Filter.Eq((fun x -> x.id), ObjectId(project.id))
                                   let update = Builders<Project>.Update.Set((fun x -> x.status), ProjectStatus.Declined)
                                   ignore(projectsCollection.UpdateOne(filter, update))
-                                  ctx.WriteJsonAsync project
+                                  next ctx
                   | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
                 )
         }
@@ -194,7 +195,7 @@ let assignProjectToGroupHandler: HttpHandler = fun (next : HttpFunc) (ctx : Http
 
                     groupsCollection.UpdateOne(groupfilter, update) |> ignore
 
-                    ctx.WriteJsonAsync input
+                    next ctx
 
       | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
     )
@@ -218,7 +219,7 @@ let publishProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpConte
                               let updateResult = projectsCollection.UpdateOne(filter, update)
                               match updateResult.MatchedCount with
                                 | 0L -> (RequestErrors.BAD_REQUEST "Project doesn't exist or hasn't been accepted") next ctx
-                                | n -> ctx.WriteJsonAsync project
+                                | n -> next ctx
               | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
             )
 }
