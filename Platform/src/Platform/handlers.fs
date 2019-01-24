@@ -12,7 +12,6 @@ open MongoDB.Driver
 open MongoDB.FSharp
 open MongoDB.Bson.Serialization.IdGenerators
 open MongoDB.Bson
-open MongoDB.Bson
 
 
 [<Literal>]
@@ -34,8 +33,6 @@ let readAll =
 let students = studentsCollection
                     .Find(Builders.Filter.Empty)
                     .ToEnumerable()
-                    |> List.ofSeq
-                    |> List.map (fun s -> {studynumber=s.studynumber; name=s.name} )
 
 let teachers = teachersCollection
                     .Find(Builders.Filter.Empty)
@@ -59,7 +56,7 @@ let headOfTeacherGetHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpCont
                   |> List.ofSeq
 
   return! ctx.WriteHtmlViewAsync ( [
-    headOfStudyView projects students
+    headOfStudyView projects (students |> List.ofSeq)
     ] |> layout) 
 }
 
@@ -73,6 +70,7 @@ let createGroupHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) 
                                     id=ObjectId.GenerateNewId();
                                     number=group.number;
                                     students=List.Empty;
+                                    projectId=ObjectId.Empty
                                   }))
                             ctx.WriteJsonAsync group
               | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
@@ -96,16 +94,20 @@ let addStudentToGroupHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpCon
 
 let addStudentHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
   task {
-            let! result = ctx.TryBindFormAsync<Student>()
+            let! result = ctx.TryBindFormAsync<StudentInput>()
 
             return!
                 (match result with
                 | Ok student -> if (studentsCollection.Find(Builders.Filter.Empty).ToEnumerable() 
                                     |> Seq.exists (fun s -> s.studynumber = student.studynumber))
                                 then (RequestErrors.BAD_REQUEST "studynumber already exists") next ctx
-                                else ignore(studentsCollection.InsertOneAsync(student))
+                                else ignore(studentsCollection.InsertOneAsync({
+                                        Student.id=ObjectId.GenerateNewId();
+                                        Student.name=student.name;
+                                        Student.studynumber=student.studynumber;
+                                      }))
                                      ctx.WriteJsonAsync student
-                | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
+                | Error err ->  (RequestErrors.BAD_REQUEST err) next ctx
                 )
         }
 
@@ -176,9 +178,31 @@ let declineProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpConte
                 )
         }
 
+let assignProjectToGroupHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -> task {
+  let! result = ctx.TryBindFormAsync<ProjectGroupInput>()
+  
+  return!
+    (match result with
+      | Ok input -> let filter = Builders<Project>.Filter.Eq((fun x -> x.id), ObjectId(input.projectId))
+
+                    let projectExist = projectsCollection.Find(filter).Any()
+                    if (not projectExist) then failwith "Project doesn't exist!"
+
+                    // let student = studentsCollection.Find(Builders<Student>.Filter.Eq((fun x -> x.studynumber), input.studynumber)).First()
+                    let groupfilter = Builders<Group>.Filter.Eq((fun x -> x.number), input.groupNumber)
+                    let update = Builders<Group>.Update.Set((fun x -> x.projectId), ObjectId(input.projectId))
+
+                    groupsCollection.UpdateOne(groupfilter, update) |> ignore
+
+                    ctx.WriteJsonAsync input
+
+      | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
+    )
+}
+
 let teacherView: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -> task {
   return! ctx.WriteHtmlViewAsync ( [
-    teacherTemplate students (groups |> List.ofSeq) // Jeg slettede noget her under merge, ved ikke om det er korrekt?
+    teacherTemplate (students |> List.ofSeq) (groups |> List.ofSeq) // Jeg slettede noget her under merge, ved ikke om det er korrekt?
     ] |> layout) 
 }
 

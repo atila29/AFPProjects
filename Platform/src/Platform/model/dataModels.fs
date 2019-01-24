@@ -12,18 +12,21 @@ type ProjectStatus =
 
 [<CLIMutable>]
 type Teacher = {
+    id: ObjectId
     name: string
     email: string
 }
 
 [<CLIMutable>]
 type Student = {
+    id: ObjectId
     name: string
     studynumber: string
 }
 
 [<CLIMutable>]
 type HeadOfStudy = {
+    id: ObjectId
     name: string
     department: string
     email: string
@@ -60,4 +63,5 @@ type Group = {
   id: ObjectId
   number: int
   students: Student seq
+  projectId: ObjectId
 }

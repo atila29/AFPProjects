@@ -37,3 +37,14 @@ type StudentGroupInput = {
   studynumber: string
 }
 
+[<CLIMutable>]
+type ProjectGroupInput = {
+  groupNumber: int
+  projectId: string
+}
+
+[<CLIMutable>]
+type StudentInput = {
+    name: string
+    studynumber: string
+}
