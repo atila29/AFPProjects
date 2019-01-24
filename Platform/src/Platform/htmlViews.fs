@@ -126,6 +126,17 @@ let teacherTemplate (students: Student list) (groups: Group list) = div[] [
         ]
       ]
   ]
+  div [] [
+    h2 [] [encodedText "Asignment of projects"]
+    form [_action "/api/project/assign"; _method "post"] [
+                p [] [ encodedText "group number" ]
+                input [_type "number"; _name "groupNumber"] 
+                p [] [ encodedText "project id" ]
+                input [_type "text"; _name "projectId"]
+                br []
+                input [_type "submit"; _value "Assign"]
+    ]
+  ]
 ]
 
 let errorTemplate (error: string) = div[] [
@@ -196,8 +207,10 @@ let headOfStudyView (requests: Project list)(students: Student list) = div [] [
     h2 [] [encodedText "students"]
     studentsTable students
     form [_action "/api/student"; _method "post"] [
-                p [] [ encodedText "id" ]
-                input [_type "text"; _name "id"] 
+                p [] [ encodedText "name" ]
+                input [_type "text"; _name "name"] 
+                p [] [ encodedText "studynumber" ]
+                input [_type "text"; _name "studynumber"] 
                 br []
                 input [_type "submit"; _value "add Student"]
     ]

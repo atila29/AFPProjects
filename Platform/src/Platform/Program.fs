@@ -42,6 +42,7 @@ let webApp =
                 route "/api/group/create" >=> createGroupHandler
                 route "/api/group/add" >=> addStudentToGroupHandler
                 route "/api/project/publish" >=> publishProjectProposal
+                route "/api/project/assign" >=> assignProjectToGroupHandler
             ]        
         setStatusCode 404 >=> text "Not Found" ]
 
