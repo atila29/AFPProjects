@@ -1,6 +1,8 @@
 module Platform.Model.Data
 
 open MongoDB.Bson
+open Newtonsoft.Json.Bson
+
 
 type ProjectStatus = 
   | Request=1
@@ -10,18 +12,21 @@ type ProjectStatus =
 
 [<CLIMutable>]
 type Teacher = {
+    id: ObjectId
     name: string
     email: string
 }
 
 [<CLIMutable>]
 type Student = {
+    id: ObjectId
     name: string
     studynumber: string
 }
 
 [<CLIMutable>]
 type HeadOfStudy = {
+    id: ObjectId
     name: string
     department: string
     email: string
@@ -36,7 +41,7 @@ type Restriction = {
 
 [<CLIMutable>]
 type Project = {
-  id: BsonObjectId
+  id: ObjectId
   title: string
   description: string
   teacher: Teacher
@@ -45,4 +50,18 @@ type Project = {
   restrictions: Restriction list
   prerequisites: string list
   cosupervisors: Teacher list
+}
+
+
+[<CLIMutable>]
+type StudentReference = {
+  studynumber: string
+}
+
+[<CLIMutable>]
+type Group = {
+  id: ObjectId
+  number: int
+  students: Student seq
+  projectId: ObjectId
 }

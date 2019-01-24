@@ -12,15 +12,16 @@ open MongoDB.Driver
 open MongoDB.FSharp
 open MongoDB.Bson.Serialization.IdGenerators
 open MongoDB.Bson
-open MongoDB.Bson
 
 
 [<Literal>]
 let DbName = "platformdb"
 let client = MongoClient()
 let db = client.GetDatabase(DbName)
+
 let projectsCollection = db.GetCollection<Project>("projects") // maybe projects?
 let studentsCollection = db.GetCollection<Student>("students")
+let groupsCollection = db.GetCollection<Group>("groups");
 let teachersCollection = db.GetCollection<Teacher>("teachers")
 let headsOfStudyCollection = db.GetCollection<HeadOfStudy>("headsOfStudy")
 
@@ -32,8 +33,6 @@ let readAll =
 let students = studentsCollection
                     .Find(Builders.Filter.Empty)
                     .ToEnumerable()
-                    |> List.ofSeq
-                    |> List.map (fun s -> {studynumber=s.studynumber; name=s.name} )
 
 let teachers = teachersCollection
                     .Find(Builders.Filter.Empty)
@@ -47,37 +46,73 @@ let headsOfStudy = headsOfStudyCollection
                         |> List.ofSeq
                         |> List.map (fun h -> h.email)
 
+let groups = groupsCollection
+                  .Find(Builders.Filter.Empty)
+                  .ToEnumerable()
+
 let headOfTeacherGetHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -> task {
 
   let projects = readAll
                   |> List.ofSeq
 
-  
-
   return! ctx.WriteHtmlViewAsync ( [
-    (headOfStudyView projects students)
+    headOfStudyView projects (students |> List.ofSeq)
     ] |> layout) 
 }
 
+let createGroupHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
+  task {
+          let! result = ctx.TryBindFormAsync<GroupInput>()
+
+          return!
+              (match result with
+              | Ok group -> ignore(groupsCollection.InsertOneAsync({
+                                    id=ObjectId.GenerateNewId();
+                                    number=group.number;
+                                    students=List.Empty;
+                                    projectId=ObjectId.Empty
+                                  }))
+                            ctx.WriteJsonAsync group
+              | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
+              )
+        }
+
+let addStudentToGroupHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
+  task {
+          let! result = ctx.TryBindFormAsync<StudentGroupInput>()
+
+          return!
+              (match result with
+              | Ok input -> let student = studentsCollection.Find(Builders<Student>.Filter.Eq((fun x -> x.studynumber), input.studynumber)).First()
+                            let groupfilter = Builders<Group>.Filter.Eq((fun x -> x.number), input.groupNumber)
+                            let update = Builders<Group>.Update.AddToSet((fun x -> x.students), student)
+                            ignore(groupsCollection.UpdateOne(groupfilter, update))
+                            ctx.WriteJsonAsync input
+              | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
+              )
+        }      
+
 let addStudentHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
   task {
-            // Binds a form payload to a Car object
-            let! result = ctx.TryBindFormAsync<Student>()
+            let! result = ctx.TryBindFormAsync<StudentInput>()
 
             return!
                 (match result with
                 | Ok student -> if (studentsCollection.Find(Builders.Filter.Empty).ToEnumerable() 
                                     |> Seq.exists (fun s -> s.studynumber = student.studynumber))
                                 then (RequestErrors.BAD_REQUEST "studynumber already exists") next ctx
-                                else ignore(studentsCollection.InsertOneAsync(student))
+                                else ignore(studentsCollection.InsertOneAsync({
+                                        Student.id=ObjectId.GenerateNewId();
+                                        Student.name=student.name;
+                                        Student.studynumber=student.studynumber;
+                                      }))
                                      ctx.WriteJsonAsync student
-                | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
+                | Error err ->  (RequestErrors.BAD_REQUEST err) next ctx
                 )
         }
 
 let submitRequestHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
   task {
-            // Binds a form payload to a Car object
             let! result = ctx.TryBindFormAsync<ProjectProposal>()
 
             return!
@@ -98,7 +133,7 @@ let submitRequestHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext
                                       let restrictions = splitCS request.restrictionsCS |> List.map (fun r -> {name=r; n=None})
                                   
                                       create ({
-                                               id=BsonObjectId(ObjectId.GenerateNewId());
+                                               id=ObjectId.GenerateNewId();
                                                title = request.title;
                                                description = request.description;
                                                teacher = supervisor;
@@ -107,8 +142,7 @@ let submitRequestHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext
                                                restrictions = restrictions;
                                                prerequisites = prerequisites;
                                                cosupervisors = cosupervisors;
-                                      })
-                                            
+                                      })    
                                       ctx.WriteJsonAsync result
                                   with
                                   | Failure f -> (RequestErrors.BAD_REQUEST f) next ctx
@@ -118,12 +152,11 @@ let submitRequestHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext
 
 let acceptProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
   task {
-            // Binds a form payload to a Car object
             let! result = ctx.TryBindFormAsync<AnswerProposalInput>()
 
             return!
                 (match result with
-                  | Ok project -> let filter = Builders<Project>.Filter.Eq((fun x -> x.id), BsonObjectId(ObjectId(project.id)))
+                  | Ok project -> let filter = Builders<Project>.Filter.Eq((fun x -> x.id), ObjectId(project.id))
                                   let update = Builders<Project>.Update.Set((fun x -> x.courseno), project.courseNo.Value).Set((fun x -> x.status), ProjectStatus.Accepted)
                                   ignore(projectsCollection.UpdateOne(filter, update))
                                   ctx.WriteJsonAsync project
@@ -133,12 +166,11 @@ let acceptProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpContex
 
 let declineProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
   task {
-            // Binds a form payload to a Car object
             let! result = ctx.TryBindFormAsync<AnswerProposalInput>()
 
             return!
                 (match result with
-                  | Ok project -> let filter = Builders<Project>.Filter.Eq((fun x -> x.id), BsonObjectId(ObjectId(project.id)))
+                  | Ok project -> let filter = Builders<Project>.Filter.Eq((fun x -> x.id), ObjectId(project.id))
                                   let update = Builders<Project>.Update.Set((fun x -> x.status), ProjectStatus.Declined)
                                   ignore(projectsCollection.UpdateOne(filter, update))
                                   ctx.WriteJsonAsync project
@@ -146,25 +178,52 @@ let declineProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpConte
                 )
         }
 
+let assignProjectToGroupHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -> task {
+  let! result = ctx.TryBindFormAsync<ProjectGroupInput>()
+  
+  return!
+    (match result with
+      | Ok input -> let filter = Builders<Project>.Filter.Eq((fun x -> x.id), ObjectId(input.projectId))
+
+                    let projectExist = projectsCollection.Find(filter).Any()
+                    if (not projectExist) then failwith "Project doesn't exist!"
+
+                    // let student = studentsCollection.Find(Builders<Student>.Filter.Eq((fun x -> x.studynumber), input.studynumber)).First()
+                    let groupfilter = Builders<Group>.Filter.Eq((fun x -> x.number), input.groupNumber)
+                    let update = Builders<Group>.Update.Set((fun x -> x.projectId), ObjectId(input.projectId))
+
+                    groupsCollection.UpdateOne(groupfilter, update) |> ignore
+
+                    ctx.WriteJsonAsync input
+
+      | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
+    )
+}
+
+let teacherView: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -> task {
+  return! ctx.WriteHtmlViewAsync ( [
+    teacherTemplate (students |> List.ofSeq) (groups |> List.ofSeq) // Jeg slettede noget her under merge, ved ikke om det er korrekt?
+    ] |> layout) 
+}
+
+
 let publishProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
   task {
         let! result = ctx.TryBindFormAsync<AnswerProposalInput>()
 
         return!
             (match result with
-              | Ok project -> let filter = Builders<Project>.Filter.Eq((fun x -> (x.id, x.status)), (BsonObjectId(ObjectId(project.id)), ProjectStatus.Accepted))
+              | Ok project -> let filter = Builders<Project>.Filter.Where(fun p -> p.id = ObjectId(project.id) && p.status = ProjectStatus.Accepted)
                               let update = Builders<Project>.Update.Set((fun x -> x.status), ProjectStatus.Published)
                               let updateResult = projectsCollection.UpdateOne(filter, update)
                               match updateResult.MatchedCount with
-                                | 0L -> (RequestErrors.BAD_REQUEST "Project must be accepted before it can be published") next ctx
+                                | 0L -> (RequestErrors.BAD_REQUEST "Project doesn't exist or hasn't been accepted") next ctx
                                 | n -> ctx.WriteJsonAsync project
               | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
             )
 }
    
-let teacherView () = htmlView ( [
-    teacherTemplate students
-] |> layout)
+
 
 let studentGetHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -> task {
 

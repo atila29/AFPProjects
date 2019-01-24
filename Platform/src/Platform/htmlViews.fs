@@ -64,7 +64,27 @@ let layout (content: XmlNode list) =
 
 
 
-let teacherTemplate (students: Student list) = div[] [
+let groupTable (groups: Group list) = div[] [
+  table [_class "table"] [
+    thead [] [
+      tr [] [
+        th [ _scope "col"] [encodedText "id"]
+        th [ _scope "col"] [encodedText "students"]
+      ]
+    ]
+    tbody [] [
+      yield!
+        groups
+        |> List.map (fun grp -> match grp with
+                                | {number=n; students=ss} -> tr [] [
+                                                               td [] [ encodedText (string n) ]
+                                                               td [] [ encodedText (String.concat ", " (ss |> Seq.map (fun s -> string s))) ]
+                                                             ])
+    ]
+  ]
+]
+
+let teacherTemplate (students: Student list) (groups: Group list) = div[] [
   form [_action "/submitrequest"; _method "post"] [
                 p [] [ encodedText "Title" ]
                 input [_type "text"; _name "title"] //type="text" name="lastname"
@@ -85,12 +105,39 @@ let teacherTemplate (students: Student list) = div[] [
       h1 [] [encodedText "students"]
       studentTableTemplate students
   ]
+  div [] [
+      h1 [] [encodedText "groups"]
+      groupTable groups
+      div [] [
+        h2 [] [encodedText "Create group"]
+        form [_action "/api/group/create"; _method "post"] [
+                p [] [ encodedText "number" ]
+                input [_type "number"; _name "number"]
+                input [_type "submit"; _value "create group"]
+        ]
+        h2 [] [encodedText "Add member group"]
+        form [_action "/api/group/add"; _method "post"] [
+                p [] [ encodedText "group number" ]
+                input [_type "number"; _name "groupNumber"] 
+                p [] [ encodedText "studentId" ]
+                input [_type "text"; _name "studentId"] 
+                br []
+                input [_type "submit"; _value "add member"]
+        ]
+      ]
+  ]
+  div [] [
+    h2 [] [encodedText "Asignment of projects"]
+    form [_action "/api/project/assign"; _method "post"] [
+                p [] [ encodedText "group number" ]
+                input [_type "number"; _name "groupNumber"] 
+                p [] [ encodedText "project id" ]
+                input [_type "text"; _name "projectId"]
+                br []
+                input [_type "submit"; _value "Assign"]
+    ]
+  ]
 ]
-
-
-
-
-
 
 let projectTableTemplate (requests: Project list) = div[] [
   table [_class "table"] [
@@ -156,8 +203,10 @@ let headOfStudyView (requests: Project list)(students: Student list) = div [] [
     h2 [] [encodedText "students"]
     studentsTable students
     form [_action "/api/student"; _method "post"] [
-                p [] [ encodedText "id" ]
-                input [_type "text"; _name "id"] 
+                p [] [ encodedText "name" ]
+                input [_type "text"; _name "name"] 
+                p [] [ encodedText "studynumber" ]
+                input [_type "text"; _name "studynumber"] 
                 br []
                 input [_type "submit"; _value "add Student"]
     ]
@@ -185,8 +234,6 @@ let headOfStudyView (requests: Project list)(students: Student list) = div [] [
                 input [_type "text"; _name "id"]
                 input [_type "submit"; _value "Publish"]
     ]
-    
-    
 ]
 
 let inspectPublishedProjectsView (publishedProjects: Project list) = div[] [
