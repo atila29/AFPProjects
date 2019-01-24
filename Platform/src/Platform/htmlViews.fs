@@ -186,7 +186,7 @@ let projectTableTemplate (requests: Project list) = div[] [
           td [] [ encodedText (string req.id) ]
           td [] [ encodedText (string req.title) ]
           td [] [ encodedText (string req.description) ]
-          td [] [ encodedText (string req.teacher) ]
+          td [] [ encodedText (string req.teacher.email) ]
           td [] [ encodedText (string req.courseno) ]
           td [] [ encodedText (string (match req.status with
                                        | ProjectStatus.Request -> "requested"
@@ -273,10 +273,27 @@ let inspectPublishedProjectsView (publishedProjects: Project list) = div[] [
 
 let studentViewTemplate (publishedProjects: Project list) (groups: Group list) = div [] [
     inspectPublishedProjectsView publishedProjects
+    h2 [] [encodedText "priorities"]
     div [] [
       yield!
         groups |> List.map (fun g -> div [] [
-          h4 [] [encodedText (string g.number)]
+          h4 [] [encodedText ("gruppe: " + (string g.number)) ]
+          table [_class "table"] [
+            thead [] [
+              tr [] [
+                th [ _scope "col"] [encodedText "priority"]
+                th [ _scope "col"] [encodedText "projectId"]
+              ]
+            ]
+            tbody [] [
+              yield!
+                g.priorityList
+                |> Seq.map (fun p -> tr [] [
+                  td [] [ encodedText (string p.priority) ]
+                  td [] [ encodedText (string p.projectId) ]
+                ])
+            ]
+          ]
         ])
     ]
     h2 [] [encodedText "create priority"]
