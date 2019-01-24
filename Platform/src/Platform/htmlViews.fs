@@ -128,11 +128,6 @@ let teacherTemplate (students: Student list) (groups: Group list) = div[] [
   ]
 ]
 
-
-
-
-
-
 let projectTableTemplate (requests: Project list) = div[] [
   table [_class "table"] [
     thead [] [
