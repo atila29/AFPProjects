@@ -1,0 +1,23 @@
+﻿begin
+	x : int, 
+	y : ^int,
+	z : ^^int,
+
+	a : int[2],
+	b : ^int[];
+
+	x := 5;
+	y := &x;
+	z := &y;
+	y^ := x + 2;
+	print z^^;
+
+	a[0] := 3;
+	a[1] := 6;
+	y := &a[0];
+	print z^^;
+
+	b^ := &a;
+	print b^[1]
+end
+

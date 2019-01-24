@@ -115,40 +115,38 @@ let addStudentHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -
 let submitRequestHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
   task {
             let! result = ctx.TryBindFormAsync<ProjectProposal>()
-
-            return!
-                (match result with
-                  | Ok request -> try 
-                                      let supervisor =
-                                          try
-                                               teachersCollection
+            
+            match result with
+            | Ok request -> let supervisorList = teachersCollection
                                                     .Find(Builders<Teacher>.Filter.Eq((fun t -> t.email), request.teacherEmail))
-                                                    .Single()
-                                          with
-                                          | _ -> failwith "more than one teacher with specified email"
-                                      let splitCS (s : string) = s.Split(',') |> List.ofArray |> List.map (fun e -> e.Trim())
-                                      let cosupervisorEmails = splitCS request.cosupervisorsEmailCS
-                                      let cosupervisors = teachersCollection.Find(Builders<Teacher>.Filter.Where(fun t -> List.contains t.email cosupervisorEmails)).ToEnumerable() |> List.ofSeq
-
-                                      let prerequisites = splitCS request.prerequisitesCS
-                                      let restrictions = splitCS request.restrictionsCS |> List.map (fun r -> {name=r; n=None})
-                                  
-                                      create ({
-                                               id=ObjectId.GenerateNewId();
-                                               title = request.title;
-                                               description = request.description;
-                                               teacher = supervisor;
-                                               courseno = 0;
-                                               status = ProjectStatus.Request;
-                                               restrictions = restrictions;
-                                               prerequisites = prerequisites;
-                                               cosupervisors = cosupervisors;
-                                      })    
-                                      next ctx
-                                  with
-                                  | Failure f -> (RequestErrors.BAD_REQUEST f) next ctx
-                  | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
-                )
+                                                    .ToList()
+                            match supervisorList.Count with
+                            | 0 -> return! ctx.WriteHtmlViewAsync ([
+                                                (errorTemplate "no teacher with specified email")
+                                                ] |> layout)
+                            | 1 -> let supervisor = supervisorList.Item(0)
+                                   let splitCS (s : string) = s.Split(',') |> List.ofArray |> List.map (fun e -> e.Trim())
+                                   let cosupervisorEmails = splitCS request.cosupervisorsEmailCS
+                                   let cosupervisors = teachersCollection.Find(Builders<Teacher>.Filter.Where(fun t -> List.contains t.email cosupervisorEmails)).ToEnumerable() |> List.ofSeq
+                                   let prerequisites = splitCS request.prerequisitesCS
+                                   let restrictions = splitCS request.restrictionsCS |> List.map (fun r -> {name=r; n=None})
+                                   create ({
+                                            id=ObjectId.GenerateNewId();
+                                            title = request.title;
+                                            description = request.description;
+                                            teacher = supervisor;
+                                            courseno = 0;
+                                            status = ProjectStatus.Request;
+                                            restrictions = restrictions;
+                                            prerequisites = prerequisites;
+                                            cosupervisors = cosupervisors;
+                                   })
+                                   return! next ctx
+                            | n -> return! ctx.WriteHtmlViewAsync ([
+                                                (errorTemplate "more than one teacher with specified email")
+                                                ] |> layout)
+            | Error err -> return! (RequestErrors.BAD_REQUEST err) next ctx
+                
         }
 
 let acceptProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
@@ -157,7 +155,7 @@ let acceptProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpContex
 
             return!
                 (match result with
-                  | Ok project -> let filter = Builders<Project>.Filter.Eq((fun x -> x.id), ObjectId(project.id))
+                  | Ok project -> let filter = Builders<Project>.Filter.Where(fun p -> p.id = ObjectId(project.id) && p.status <> ProjectStatus.Published)
                                   let update = Builders<Project>.Update.Set((fun x -> x.courseno), project.courseNo.Value).Set((fun x -> x.status), ProjectStatus.Accepted)
                                   ignore(projectsCollection.UpdateOne(filter, update))
                                   next ctx
