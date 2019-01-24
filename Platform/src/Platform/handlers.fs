@@ -37,8 +37,6 @@ let students = studentsCollection
 let teachers = teachersCollection
                     .Find(Builders.Filter.Empty)
                     .ToEnumerable()
-                    |> List.ofSeq
-                    |> List.map (fun t -> t.email)
 
 let headsOfStudy = headsOfStudyCollection
                         .Find(Builders.Filter.Empty)
@@ -70,7 +68,8 @@ let createGroupHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) 
                                     id=ObjectId.GenerateNewId();
                                     number=group.number;
                                     students=List.Empty;
-                                    projectId=ObjectId.Empty
+                                    projectId=ObjectId.Empty;
+                                    wishList=[]
                                   }))
                             next ctx
                             //ctx.WriteJsonAsync group
@@ -112,7 +111,7 @@ let addStudentHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -
                 )
         }
 
-let submitRequestHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
+let submitProjectProposalsHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
   task {
             let! result = ctx.TryBindFormAsync<ProjectProposal>()
             
@@ -127,9 +126,14 @@ let submitRequestHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext
                             | 1 -> let supervisor = supervisorList.Item(0)
                                    let splitCS (s : string) = s.Split(',') |> List.ofArray |> List.map (fun e -> e.Trim())
                                    let cosupervisorEmails = splitCS request.cosupervisorsEmailCS
-                                   let cosupervisors = teachersCollection.Find(Builders<Teacher>.Filter.Where(fun t -> List.contains t.email cosupervisorEmails)).ToEnumerable() |> List.ofSeq
+
+                                   let rec findFromMails mails = match mails with
+                                                                  | [] -> []
+                                                                  | x::xs -> (teachersCollection.Find(Builders<Teacher>.Filter.Eq((fun t -> t.email), x)).ToEnumerable() |> List.ofSeq) @ findFromMails xs
+                                      
+
+                                   let cosupervisors = findFromMails cosupervisorEmails
                                    let prerequisites = splitCS request.prerequisitesCS
-                                   let restrictions = splitCS request.restrictionsCS |> List.map (fun r -> {name=r; n=None})
                                    create ({
                                             id=ObjectId.GenerateNewId();
                                             title = request.title;
@@ -137,7 +141,6 @@ let submitRequestHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext
                                             teacher = supervisor;
                                             courseno = 0;
                                             status = ProjectStatus.Request;
-                                            restrictions = restrictions;
                                             prerequisites = prerequisites;
                                             cosupervisors = cosupervisors;
                                    })
@@ -201,7 +204,7 @@ let assignProjectToGroupHandler: HttpHandler = fun (next : HttpFunc) (ctx : Http
 
 let teacherView: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -> task {
   return! ctx.WriteHtmlViewAsync ( [
-    teacherTemplate (students |> List.ofSeq) (groups |> List.ofSeq) // Jeg slettede noget her under merge, ved ikke om det er korrekt?
+    teacherTemplate (students |> List.ofSeq) (groups |> List.ofSeq) (teachers |> List.ofSeq) // Jeg slettede noget her under merge, ved ikke om det er korrekt?
     ] |> layout) 
 }
 
@@ -220,7 +223,7 @@ let publishProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpConte
                                 | n -> next ctx
               | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
             )
-}
+  }
    
 
 
@@ -228,20 +231,9 @@ let studentGetHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -
 
         let publishedProjects = readAll
                                 |> List.ofSeq
-                                |> List.map (fun r -> {
-                                    Project.id = r.id;
-                                    Project.title = r.title;
-                                    Project.description = r.description;
-                                    Project.teacher = r.teacher;
-                                    Project.courseno = r.courseno;
-                                    Project.status = r.status;
-                                    Project.cosupervisors = r.cosupervisors;
-                                    Project.prerequisites = r.prerequisites;
-                                    Project.restrictions = r.restrictions;
-                                }) 
                                 |> List.filter (fun pd -> pd.status = ProjectStatus.Published)
         return! ctx.WriteHtmlViewAsync ( [
-            (inspectPublishedProjectsView publishedProjects)
+            studentViewTemplate publishedProjects
           ] |> layout) 
 }
 

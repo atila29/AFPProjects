@@ -62,8 +62,6 @@ let layout (content: XmlNode list) =
             ])
         ]
 
-
-
 let groupTable (groups: Group list) = div[] [
   table [_class "table"] [
     thead [] [
@@ -84,8 +82,31 @@ let groupTable (groups: Group list) = div[] [
   ]
 ]
 
-let teacherTemplate (students: Student list) (groups: Group list) = div[] [
-  form [_action "/submitrequest"; _method "post"] [
+let teacherTableTemplate (teachers: Teacher list) = div [] [
+  table [_class "table"] [
+    thead [] [
+      tr [] [
+        th [ _scope "col"] [encodedText "name"]
+        th [ _scope "col"] [encodedText "email"]
+      ]
+    ]
+    tbody [] [
+      yield!
+        teachers
+        |> List.map (fun t -> match t with
+                                | {email=mail; name=name} -> tr [] [
+                                                               td [] [ encodedText name ]
+                                                               td [] [ encodedText mail]
+                                                             ])
+    ]
+  ]
+]
+
+let teacherTemplate (students: Student list) (groups: Group list) (teachers: Teacher list) = div[] [
+  h2 [] [encodedText "teachers"]
+  teacherTableTemplate teachers
+  h2 [] [encodedText "Project proposals"]
+  form [_action "/api/project/submit"; _method "post"] [
                 p [] [ encodedText "Title" ]
                 input [_type "text"; _name "title"] //type="text" name="lastname"
                 p [] [ encodedText "Description" ]
@@ -96,8 +117,8 @@ let teacherTemplate (students: Student list) (groups: Group list) = div[] [
                 input [_type "text"; _name "prerequisitesCS"]
                 p [] [ encodedText "Cosupervisor emails (comma-separated)" ]
                 input [_type "text"; _name "cosupervisorsEmailCS"]
-                p [] [ encodedText "Restrictions (command-separated)" ]
-                input [_type "text"; _name "restrictionsCS"]
+                // p [] [ encodedText "Restrictions (command-separated)" ] // TODO: her skal custom restrictions være
+                // input [_type "text"; _name "restrictionsCS"]
                 br []
                 input [_type "submit"; _value "Request"]
   ]
@@ -153,7 +174,7 @@ let projectTableTemplate (requests: Project list) = div[] [
         th [ _scope "col"] [encodedText "teacher"]
         th [ _scope "col"] [encodedText "courseno"]
         th [ _scope "col"] [encodedText "status"]
-        th [ _scope "col"] [encodedText "restrictions"]
+        // th [ _scope "col"] [encodedText "restrictions"]
         th [ _scope "col"] [encodedText "prerequisites"]
         th [ _scope "col"] [encodedText "cosupervisors"]
       ]
@@ -174,9 +195,9 @@ let projectTableTemplate (requests: Project list) = div[] [
                                        | ProjectStatus.Published -> "published"
                                        | _ -> ""
                                        ))]
-          td [] [ encodedText (req.restrictions |> List.map (fun r -> string r.name) |> String.concat "<br/>") ]
+          // td [] [ encodedText (req.restrictions |> List.map (fun r -> string r.name) |> String.concat "<br/>") ]
           td [] [ encodedText (req.prerequisites |> String.concat "<br/>") ]
-          td [] [ encodedText (req.cosupervisors |> List.map (fun c -> c.name) |> String.concat "<br/>") ]
+          td [] [ encodedText (req.cosupervisors |> List.ofSeq |> List.map (fun c -> c.name) |> String.concat "<br/>") ]
         ])
     ]
   ]
@@ -240,9 +261,19 @@ let headOfStudyView (requests: Project list)(students: Student list) = div [] [
     ]
 ]
 
+
 let inspectPublishedProjectsView (publishedProjects: Project list) = div[] [
     div [] [
       h1 [] [encodedText "Bachelor Projects"]
       projectTableTemplate publishedProjects
   ]
+]
+
+
+
+let studentViewTemplate (publishedProjects: Project list) = div [] [
+    inspectPublishedProjectsView publishedProjects
+    div [] [
+      
+    ]
 ]

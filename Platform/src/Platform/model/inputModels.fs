@@ -10,7 +10,6 @@ type ProjectProposal = {
   title: string
   description: string
   teacherEmail: string
-  restrictionsCS: string
   prerequisitesCS: string
   cosupervisorsEmailCS: string
 }

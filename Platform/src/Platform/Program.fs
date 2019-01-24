@@ -32,8 +32,8 @@ let webApp =
             ]
         POST >=> 
             choose [
-                route "/submitrequest" >=> submitRequestHandler >=> redirectTo true "/teacher"
                 route "/api/student" >=> addStudentHandler >=> redirectTo true "/head"
+                route "/api/project/submit" >=> submitProjectProposalsHandler >=> redirectTo true "/teacher"
                 route "/api/project/accept" >=> acceptProjectProposal >=> redirectTo true "/head"
                 route "/api/project/decline" >=> declineProjectProposal >=> redirectTo true "/head"
                 route "/api/group/create" >=> createGroupHandler >=> redirectTo true "/teacher"
