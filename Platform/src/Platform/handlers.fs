@@ -64,13 +64,13 @@ let createGroupHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) 
 
           return!
               (match result with
-              | Ok group -> ignore(groupsCollection.InsertOneAsync({
+              | Ok group -> groupsCollection.InsertOneAsync({
                                     id=ObjectId.GenerateNewId();
                                     number=group.number;
                                     students=List.Empty;
                                     projectId=ObjectId.Empty;
-                                    wishList=[]
-                                  }))
+                                    priorityList=[]
+                                  }) |> ignore
                             next ctx
                             //ctx.WriteJsonAsync group
               | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
@@ -86,7 +86,7 @@ let addStudentToGroupHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpCon
               | Ok input -> let student = studentsCollection.Find(Builders<Student>.Filter.Eq((fun x -> x.studynumber), input.studynumber)).First()
                             let groupfilter = Builders<Group>.Filter.Eq((fun x -> x.number), input.groupNumber)
                             let update = Builders<Group>.Update.AddToSet((fun x -> x.students), student)
-                            ignore(groupsCollection.UpdateOne(groupfilter, update))
+                            groupsCollection.UpdateOne(groupfilter, update) |> ignore
                             next ctx
               | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
               )
@@ -101,11 +101,11 @@ let addStudentHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -
                 | Ok student -> if (studentsCollection.Find(Builders.Filter.Empty).ToEnumerable() 
                                     |> Seq.exists (fun s -> s.studynumber = student.studynumber))
                                 then (RequestErrors.BAD_REQUEST "studynumber already exists") next ctx
-                                else ignore(studentsCollection.InsertOneAsync({
+                                else studentsCollection.InsertOneAsync({
                                         Student.id=ObjectId.GenerateNewId();
                                         Student.name=student.name;
                                         Student.studynumber=student.studynumber;
-                                      }))
+                                      }) |> ignore
                                      next ctx
                 | Error err ->  (RequestErrors.BAD_REQUEST err) next ctx
                 )
@@ -160,7 +160,7 @@ let acceptProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpContex
                 (match result with
                   | Ok project -> let filter = Builders<Project>.Filter.Where(fun p -> p.id = ObjectId(project.id) && p.status <> ProjectStatus.Published)
                                   let update = Builders<Project>.Update.Set((fun x -> x.courseno), project.courseNo.Value).Set((fun x -> x.status), ProjectStatus.Accepted)
-                                  ignore(projectsCollection.UpdateOne(filter, update))
+                                  projectsCollection.UpdateOne(filter, update) |> ignore
                                   next ctx
                   | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
                 )
@@ -174,7 +174,7 @@ let declineProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpConte
                 (match result with
                   | Ok project -> let filter = Builders<Project>.Filter.Eq((fun x -> x.id), ObjectId(project.id))
                                   let update = Builders<Project>.Update.Set((fun x -> x.status), ProjectStatus.Declined)
-                                  ignore(projectsCollection.UpdateOne(filter, update))
+                                  projectsCollection.UpdateOne(filter, update) |> ignore
                                   next ctx
                   | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
                 )
@@ -209,7 +209,7 @@ let teacherView: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -> task
 }
 
 
-let publishProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
+let publishProject: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) ->
   task {
         let! result = ctx.TryBindFormAsync<AnswerProposalInput>()
 
@@ -227,13 +227,36 @@ let publishProjectProposal: HttpHandler = fun (next : HttpFunc) (ctx : HttpConte
    
 
 
+let setGroupPriority: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -> task {
+  let! result = ctx.TryBindFormAsync<ProjectPriorityInput>()
+
+  return!
+      (match result with
+        | Ok input -> let priorities = input.projectIds.Split(",")
+                                        |> Seq.distinct
+                                        |> List.ofSeq 
+                                        |> List.mapi (fun i x -> {
+                                                                  id=ObjectId.GenerateNewId()
+                                                                  projectId=ObjectId(x);
+                                                                  priority=i;
+                                                                })
+                                        |> Seq.ofList
+                                        
+                      let filter = Builders<Group>.Filter.Eq((fun x -> x.number), input.groupNo)
+                      let update = Builders<Group>.Update.Set((fun x -> x.priorityList), priorities)
+                      groupsCollection.UpdateOne(filter, update) |> ignore
+                      next ctx  
+        | Error err -> (RequestErrors.BAD_REQUEST err) next ctx
+      )
+}
+
 let studentGetHandler: HttpHandler = fun (next : HttpFunc) (ctx : HttpContext) -> task {
 
         let publishedProjects = readAll
                                 |> List.ofSeq
                                 |> List.filter (fun pd -> pd.status = ProjectStatus.Published)
         return! ctx.WriteHtmlViewAsync ( [
-            studentViewTemplate publishedProjects
+            studentViewTemplate publishedProjects (groups |> List.ofSeq)
           ] |> layout) 
 }
 

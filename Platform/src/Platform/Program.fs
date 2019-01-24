@@ -33,12 +33,13 @@ let webApp =
         POST >=> 
             choose [
                 route "/api/student" >=> addStudentHandler >=> redirectTo true "/head"
+                route "/api/group/create" >=> createGroupHandler >=> redirectTo true "/teacher"
+                route "/api/group/add" >=> addStudentToGroupHandler >=> redirectTo true "/teacher"
+                route "/api/group/priority" >=> setGroupPriority >=> redirectTo true "/student"
                 route "/api/project/submit" >=> submitProjectProposalsHandler >=> redirectTo true "/teacher"
                 route "/api/project/accept" >=> acceptProjectProposal >=> redirectTo true "/head"
                 route "/api/project/decline" >=> declineProjectProposal >=> redirectTo true "/head"
-                route "/api/group/create" >=> createGroupHandler >=> redirectTo true "/teacher"
-                route "/api/group/add" >=> addStudentToGroupHandler >=> redirectTo true "/teacher"
-                route "/api/project/publish" >=> publishProjectProposal >=> redirectTo true "/head"
+                route "/api/project/publish" >=> publishProject >=> redirectTo true "/head"
                 route "/api/project/assign" >=> assignProjectToGroupHandler >=> redirectTo true "/teacher"
             ]        
         setStatusCode 404 >=> text "Not Found" ]

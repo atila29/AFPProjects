@@ -47,10 +47,16 @@ type Project = {
   cosupervisors: Teacher seq
 }
 
-
 [<CLIMutable>]
 type StudentReference = {
   studynumber: string
+}
+
+[<CLIMutable>]
+type Priority = {
+  id: ObjectId
+  projectId: ObjectId
+  priority: int
 }
 
 [<CLIMutable>]
@@ -59,5 +65,5 @@ type Group = {
   number: int
   students: Student seq
   projectId: ObjectId
-  wishList: ObjectId seq
+  priorityList: Priority seq
 }

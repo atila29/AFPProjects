@@ -47,3 +47,9 @@ type StudentInput = {
     name: string
     studynumber: string
 }
+
+[<CLIMutable>]
+type ProjectPriorityInput = {
+    groupNo: int
+    projectIds: string
+}

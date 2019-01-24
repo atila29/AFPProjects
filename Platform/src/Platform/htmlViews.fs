@@ -271,9 +271,22 @@ let inspectPublishedProjectsView (publishedProjects: Project list) = div[] [
 
 
 
-let studentViewTemplate (publishedProjects: Project list) = div [] [
+let studentViewTemplate (publishedProjects: Project list) (groups: Group list) = div [] [
     inspectPublishedProjectsView publishedProjects
     div [] [
-      
+      yield!
+        groups |> List.map (fun g -> div [] [
+          h4 [] [encodedText (string g.number)]
+        ])
     ]
+    h2 [] [encodedText "create priority"]
+    form [_action "/api/group/priority"; _method "post"] [
+    p [] [ encodedText "groupNr" ]
+    input [_type "text"; _name "groupNo"]
+    p [] [ encodedText "project id's ordered, and seperated by comma" ]
+    input [_type "text"; _name "projectIds"]
+    br []
+    input [_type "submit"; _value "Accept"]
+    ]
+    
 ]
